@@ -361,7 +361,7 @@ namespace SalarDbCodeGenerator.Schema.DbSchemaReaders
 				{
 					toSetColumn.DataTypeMaxLength = Convert.ToInt32(tempInfo);
 				}
-				catch (OverflowException o)
+				catch
 				{
 					toSetColumn.DataTypeMaxLength = -1;
 				}
