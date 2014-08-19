@@ -56,8 +56,8 @@ namespace SalarDbCodeGenerator.GeneratorEngine
 				Common.AppVarPathMakeAbsolute(_projectDef.CodeGenSettings.CodeGenPatternFile));
 
 			// arrays! don't remember why I did this and too lazy to check! :)
-			var schemaTables = _database.SchemaTables.ToArray();
-			var schemaViews = _database.SchemaViews.ToArray();
+			var schemaTables = (from t in _database.SchemaTables orderby t.TableName select t).ToArray();
+			var schemaViews = (from v in _database.SchemaViews orderby v.TableName select v).ToArray();
 
 			// all the pattern files
 			_patternProject.PatternFiles.ForEach(
