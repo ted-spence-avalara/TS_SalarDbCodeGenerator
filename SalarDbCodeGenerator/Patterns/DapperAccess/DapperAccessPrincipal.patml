@@ -58,6 +58,31 @@ namespace [:Namespace:].Entities
 			var queryResult = Query<[:TableName:]>(string.Format("[#GetTopSelectStatement#]", count, SqlTableName));
 			return queryResult as List<[:TableName:]> ?? queryResult.ToList();
 		}
+        
+        private static [:TableName:][] _obj_cache;
+        private static readonly object _cache_lock = new object();
+        private static DateTime _next_cache_date = DateTime.MinValue;
+        private static int CACHE_SECONDS = ConfigurationManager.AppSettings["DAPPER_CACHE_TIME"] == null ? 5 * 60 : int.Parse(ConfigurationManager.AppSettings["DAPPER_CACHE_TIME"]);
+        public List<[:TableName:]> GetAll(bool force_cache_reload)
+        {
+            if (_obj_cache == null || _next_cache_date < DateTime.UtcNow || force_cache_reload) {
+                lock (_cache_lock) {
+                    if (_obj_cache == null || _next_cache_date < DateTime.UtcNow || force_cache_reload) {
+                        _obj_cache = Query<[:TableName:]>(string.Format("SELECT * FROM {0}", SqlTableName)).ToArray();
+                        _next_cache_date = DateTime.UtcNow.AddSeconds(CACHE_SECONDS);
+                    }
+                }
+            }
+            return _obj_cache.ToList();
+        }
+
+        public void ResetCache()
+		{
+            lock (_cache_lock) {
+                _next_cache_date = DateTime.MinValue;
+                _obj_cache = null;
+            }
+		}
 [#UpdatableTable#]
 [#ForeignKeys#]
 [#IndexConstraintKeys#]
@@ -157,6 +182,7 @@ namespace [:Namespace:].Entities
 		public void DeleteBy[:IndexKeyName:]([:IndexKeyDotNetType:] [:IndexKeyName:])
 		{
 			Execute(SqlDeleteCommand, new { [:IndexKeyName:] = [:IndexKeyName:] });
+            ResetCache();
 		}]]>
 				</Condition>
 			</PatternContent>
@@ -168,11 +194,13 @@ namespace [:Namespace:].Entities
 		public void Insert([:TableName:] model)
 		{
 			Execute(SqlInsertCommand, model);
+            ResetCache();
 		}
 
 		public void Insert(IEnumerable<[:TableName:]> models)
 		{
 			Execute(SqlInsertCommand, models);
+            ResetCache();
 		}]]>
 				</Condition>
 				<Condition Key="WithPrimaryKey">
@@ -181,26 +209,43 @@ namespace [:Namespace:].Entities
 		public void Insert([:TableName:] model)
 		{
 			Execute(SqlInsertCommand, model);
+            ResetCache();
 		}
 
 		public void Insert(IEnumerable<[:TableName:]> models)
 		{
 			Execute(SqlInsertCommand, models);
+            ResetCache();
 		}
 
+		/// <summary>
+		/// Insert this record and return the [:PrimaryKeyName:] from OUTPUT inserted.
+		/// </summary>
+		/// <returns>[:PrimaryKeyName:] from OUTPUT inserted.</returns>
+        public [:PrimaryKeyDotNetType:] InsertWithId([:TableName:] model)
+        {
+            string newsql = SqlInsertCommand.Replace(") VALUES (", ") OUTPUT inserted.[:PrimaryKeyName:] VALUES (");
+            var result = Query<[:PrimaryKeyDotNetType:]>(newsql, model);
+            ResetCache();
+            return result.FirstOrDefault();
+        }
+        
 		public void Delete([#PrimaryKeyListAsArguments#])
 		{
 			Execute(SqlDeleteCommand, new { [#PrimaryKeyListAsCodeProps#] });
+            ResetCache();
 		}
 
 		public void Update([:TableName:] model)
 		{
 			Execute(SqlUpdateCommand, model);
+            ResetCache();
 		}
 
 		public void Update(IEnumerable<[:TableName:]> models)
 		{
 			Execute(SqlUpdateCommand, models);
+            ResetCache();
 		}]]>
 				</Condition>
 
