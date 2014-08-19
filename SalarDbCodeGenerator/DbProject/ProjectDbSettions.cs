@@ -1,6 +1,6 @@
 ﻿using MySql.Data.MySqlClient;
 using Npgsql;
-using Oracle.ManagedDataAccess.Client;
+//using Oracle.ManagedDataAccess.Client;
 using SalarDbCodeGenerator.Schema.DbSchemaReaders;
 using System;
 using System.Collections.Generic;
@@ -107,8 +107,10 @@ namespace SalarDbCodeGenerator.DbProject
 				case DatabaseProvider.SQLServer:
 					return new SqlConnection(GetConnectionString());
 
+#if ORACLE
 				case DatabaseProvider.Oracle:
 					return new OracleConnection(GetConnectionString());
+#endif
 
 				case DatabaseProvider.SqlCe4:
 					return new SqlCeConnection(GetConnectionString());
@@ -139,8 +141,10 @@ namespace SalarDbCodeGenerator.DbProject
 				case DatabaseProvider.SQLServer:
 					return new SQLSchemaEngine(dbConnection);
 
+#if ORACLE
 				case DatabaseProvider.Oracle:
 					return new OracleSchemaEngine(dbConnection);
+#endif
 
 				case DatabaseProvider.SQLite:
 					return new SQLiteSchemaEngine(dbConnection);

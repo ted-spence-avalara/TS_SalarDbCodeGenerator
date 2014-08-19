@@ -1,6 +1,8 @@
 ﻿using MySql.Data.MySqlClient;
 using Npgsql;
+#if ORACLE
 using Oracle.ManagedDataAccess.Client;
+#endif
 using SalarDbCodeGenerator.DbProject;
 using SalarDbCodeGenerator.Properties;
 using SalarDbCodeGenerator.Schema.DbSchemaReaders;
@@ -475,7 +477,8 @@ namespace SalarDbCodeGenerator.Presentation
 			}
 		}
 
-		bool TestOracleConnection(string connStr, out string message)
+#if ORACLE
+        bool TestOracleConnection(string connStr, out string message)
 		{
 			message = "";
 			try
@@ -492,6 +495,7 @@ namespace SalarDbCodeGenerator.Presentation
 				return false;
 			}
 		}
+#endif
 
 		bool TestPgConnection(string connStr)
 		{
@@ -684,8 +688,9 @@ namespace SalarDbCodeGenerator.Presentation
 			}
 		}
 
-		private void btnOrclTestConnection_Click(object sender, EventArgs e)
+        private void btnOrclTestConnection_Click(object sender, EventArgs e)
 		{
+#if ORACLE
 			const string connSpecificUser = "Data Source={0};User Id={1};Password={2};";
 			const string connIntegratedSecurity = "Data Source={0};Integrated Security=SSPI;";
 			const string connDbaPrivilege = "DBA PRIVILEGE=SYSDBA;";
@@ -714,8 +719,10 @@ namespace SalarDbCodeGenerator.Presentation
 				PleaseWait.Abort();
 				MessageBox.Show("Connection test failed!\n" + message, "Test failed!", MessageBoxButtons.OK, MessageBoxIcon.Error);
 			}
-
-		}
+#else
+            MessageBox.Show("SalarDbGenerator was not compiled with support for Oracle databases.  Please specify -D ORACLE when compiling.");
+#endif
+        }
 
 		private void btnSlider_Click(object sender, EventArgs e)
 		{
