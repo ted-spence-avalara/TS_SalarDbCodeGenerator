@@ -221,7 +221,7 @@ namespace [:Namespace:].Entities
 		}
 ]]>
 						</Condition>
-						<Condition Key="AutoInrcementPrimaryKey">
+						<Condition Key="AutoIncrementPrimaryKey">
 							<![CDATA[
 		public [:TableName:] GetBy[:FieldName:]([:FieldDotNetType:] [:FieldName:])
 		{
@@ -229,7 +229,7 @@ namespace [:Namespace:].Entities
 		}
 ]]>
 						</Condition>
-						<Condition Key="AutoInrcement"></Condition>
+						<Condition Key="AutoIncrement"></Condition>
 						<Condition Key="AutoIncNativeNullable"></Condition>
 						<Condition Key="AutoIncNullableType"></Condition>
 						<Condition Key="PrimaryKey">
@@ -255,10 +255,10 @@ namespace [:Namespace:].Entities
 						<Condition Key="OneToOneForeignKey">
 							<![CDATA[[:FieldName:] = [:FieldName:]]]>
 						</Condition>
-						<Condition Key="AutoInrcementPrimaryKey">
+						<Condition Key="AutoIncrementPrimaryKey">
 							<![CDATA[[:FieldName:] = [:FieldName:]]]>
 						</Condition>
-						<Condition Key="AutoInrcement"></Condition>
+						<Condition Key="AutoIncrement"></Condition>
 						<Condition Key="AutoIncNativeNullable"></Condition>
 						<Condition Key="AutoIncNullableType"></Condition>
 						<Condition Key="PrimaryKey">
@@ -279,10 +279,10 @@ namespace [:Namespace:].Entities
 						<Condition Key="OneToOneForeignKey">
 							<![CDATA[[:FieldDotNetType:] [:FieldName:]]]>
 						</Condition>
-						<Condition Key="AutoInrcementPrimaryKey">
+						<Condition Key="AutoIncrementPrimaryKey">
 							<![CDATA[[:FieldDotNetType:] [:FieldName:]]]>
 						</Condition>
-						<Condition Key="AutoInrcement"></Condition>
+						<Condition Key="AutoIncrement"></Condition>
 						<Condition Key="AutoIncNativeNullable"></Condition>
 						<Condition Key="AutoIncNullableType"></Condition>
 						<Condition Key="PrimaryKey">
@@ -324,8 +324,8 @@ namespace [:Namespace:].Entities
 						</ItemsSeperator>
 						<Condition Key="OneToOnePrimaryKey"></Condition>
 						<Condition Key="OneToOneForeignKey"><![CDATA[[:FieldNameDb:]]]></Condition>
-						<Condition Key="AutoInrcementPrimaryKey"></Condition>
-						<Condition Key="AutoInrcement"></Condition>
+						<Condition Key="AutoIncrementPrimaryKey"></Condition>
+						<Condition Key="AutoIncrement"></Condition>
 						<Condition Key="AutoIncNativeNullable"></Condition>
 						<Condition Key="AutoIncNullableType"></Condition>
 						<Condition Key="PrimaryKey"><![CDATA[[:FieldNameDb:]]]></Condition>
@@ -340,8 +340,8 @@ namespace [:Namespace:].Entities
 						</ItemsSeperator>
 						<Condition Key="OneToOnePrimaryKey"></Condition>
 						<Condition Key="OneToOneForeignKey"><![CDATA[[:ProviderSPParamPrefix:][:FieldName:]]]></Condition>
-						<Condition Key="AutoInrcementPrimaryKey"></Condition>
-						<Condition Key="AutoInrcement"></Condition>
+						<Condition Key="AutoIncrementPrimaryKey"></Condition>
+						<Condition Key="AutoIncrement"></Condition>
 						<Condition Key="AutoIncNativeNullable"></Condition>
 						<Condition Key="AutoIncNullableType"></Condition>
 						<Condition Key="PrimaryKey"><![CDATA[[:ProviderSPParamPrefix:][:FieldName:]]]></Condition>
@@ -356,8 +356,8 @@ namespace [:Namespace:].Entities
 						</ItemsSeperator>
 						<Condition Key="OneToOnePrimaryKey"></Condition>
 						<Condition Key="OneToOneForeignKey"><![CDATA[[:FieldNameDb:]=[:ProviderSPParamPrefix:][:FieldName:]]]></Condition>
-						<Condition Key="AutoInrcementPrimaryKey"></Condition>
-						<Condition Key="AutoInrcement"></Condition>
+						<Condition Key="AutoIncrementPrimaryKey"></Condition>
+						<Condition Key="AutoIncrement"></Condition>
 						<Condition Key="AutoIncNativeNullable"></Condition>
 						<Condition Key="AutoIncNullableType"></Condition>
 						<Condition Key="PrimaryKey"><![CDATA[[:FieldNameDb:]=[:ProviderSPParamPrefix:][:FieldName:]]]></Condition>
@@ -376,10 +376,10 @@ namespace [:Namespace:].Entities
 						<Condition Key="OneToOneForeignKey">
 							<![CDATA[[:FieldNameDb:]=[:ProviderSPParamPrefix:][:FieldName:]]]>
 						</Condition>
-						<Condition Key="AutoInrcementPrimaryKey">
+						<Condition Key="AutoIncrementPrimaryKey">
 							<![CDATA[[:FieldNameDb:]=[:ProviderSPParamPrefix:][:FieldName:]]]>
 						</Condition>
-						<Condition Key="AutoInrcement"></Condition>
+						<Condition Key="AutoIncrement"></Condition>
 						<Condition Key="AutoIncNativeNullable"></Condition>
 						<Condition Key="AutoIncNullableType"></Condition>
 						<Condition Key="PrimaryKey">

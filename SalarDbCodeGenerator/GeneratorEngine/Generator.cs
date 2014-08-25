@@ -1597,7 +1597,7 @@ namespace SalarDbCodeGenerator.GeneratorEngine
 			}
 			else if (column.AutoIncrement && column.PrimaryKey)
 			{
-				keyTypeReplacer = partialContent.GetReplacement(ConditionKeyModeConsts.FieldKeyType.AutoInrcementPrimaryKey);
+				keyTypeReplacer = partialContent.GetReplacement(ConditionKeyModeConsts.FieldKeyType.AutoIncrementPrimaryKey);
 			}
 			else if (column.AutoIncrement && column.AllowNull && !dataTypeNotNullable)
 			{
@@ -1612,7 +1612,7 @@ namespace SalarDbCodeGenerator.GeneratorEngine
 			}
 			else if (column.AutoIncrement)
 			{
-				keyTypeReplacer = partialContent.GetReplacement(ConditionKeyModeConsts.FieldKeyType.AutoInrcement);
+				keyTypeReplacer = partialContent.GetReplacement(ConditionKeyModeConsts.FieldKeyType.AutoIncrement);
 			}
 			else if (column.PrimaryKey)
 			{

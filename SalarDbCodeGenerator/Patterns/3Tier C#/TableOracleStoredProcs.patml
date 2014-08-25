@@ -269,8 +269,8 @@ GO
 							<![CDATA[
 	@[:FieldNameDb:] [:FieldDbTypeSize:]]]>
 						</Condition>
-						<Condition Key="AutoInrcementPrimaryKey"></Condition>
-						<Condition Key="AutoInrcement"></Condition>
+						<Condition Key="AutoIncrementPrimaryKey"></Condition>
+						<Condition Key="AutoIncrement"></Condition>
 						<Condition Key="AutoIncNativeNullable"></Condition>
 						<Condition Key="AutoIncNullableType"></Condition>
 						<Condition Key="PrimaryKey">
@@ -302,11 +302,11 @@ GO
 							<![CDATA[
 	@[:FieldNameDb:] [:FieldDbTypeSize:]]]>
 						</Condition>
-						<Condition Key="AutoInrcementPrimaryKey">
+						<Condition Key="AutoIncrementPrimaryKey">
 							<![CDATA[
 	@[:FieldNameDb:] [:FieldDbTypeSize:]]]>
 						</Condition>
-						<Condition Key="AutoInrcement"></Condition>
+						<Condition Key="AutoIncrement"></Condition>
 						<Condition Key="PrimaryKey">
 							<![CDATA[
 	@[:FieldNameDb:] [:FieldDbTypeSize:]]]>
@@ -348,8 +348,8 @@ GO
 						<Condition Key="OneToOneForeignKey">
 							<![CDATA[[[:FieldNameDb:]] ]]>
 						</Condition>
-						<Condition Key="AutoInrcementPrimaryKey"></Condition>
-						<Condition Key="AutoInrcement"></Condition>
+						<Condition Key="AutoIncrementPrimaryKey"></Condition>
+						<Condition Key="AutoIncrement"></Condition>
 						<Condition Key="PrimaryKey">
 							<![CDATA[[[:FieldNameDb:]] ]]>
 						</Condition>
@@ -371,8 +371,8 @@ GO
 						<Condition Key="OneToOneForeignKey">
 							<![CDATA[@[:FieldNameDb:] ]]>
 						</Condition>
-						<Condition Key="AutoInrcementPrimaryKey"></Condition>
-						<Condition Key="AutoInrcement"></Condition>
+						<Condition Key="AutoIncrementPrimaryKey"></Condition>
+						<Condition Key="AutoIncrement"></Condition>
 						<Condition Key="PrimaryKey">
 							<![CDATA[@[:FieldNameDb:] ]]>
 						</Condition>
@@ -395,8 +395,8 @@ GO
 							<![CDATA[
 		[[:FieldNameDb:]] = @[:FieldNameDb:] ]]>
 						</Condition>
-						<Condition Key="AutoInrcementPrimaryKey"></Condition>
-						<Condition Key="AutoInrcement"></Condition>
+						<Condition Key="AutoIncrementPrimaryKey"></Condition>
+						<Condition Key="AutoIncrement"></Condition>
 						<Condition Key="PrimaryKey">
 							<![CDATA[
 		[[:FieldNameDb:]] = @[:FieldNameDb:] ]]>

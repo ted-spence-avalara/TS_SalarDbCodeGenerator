@@ -99,7 +99,7 @@ namespace SalarDbCodeGenerator.Schema.Patterns
 		ForeignKeyDeleteAction,
 
 		/// <summary>
-		/// AutoInrcementPrimaryKey ,AutoInrcement, PrimaryKey, AutoIncNativeNullable, AutoIncNullableType, NormalField, NativeNullable, NullableType
+		/// AutoIncrementPrimaryKey ,AutoIncrement, PrimaryKey, AutoIncNativeNullable, AutoIncNullableType, NormalField, NativeNullable, NullableType
 		/// </summary>
 		FieldsKeyTypeAll,
 		FieldsReferencedKeyTypeAll,
@@ -196,11 +196,11 @@ namespace SalarDbCodeGenerator.Schema.Patterns
 		}
 
 		/// <summary>
-		/// AutoInrcementPrimaryKey ,AutoInrcement, PrimaryKey,OneToOnePrimaryKey , OneToOneForeignKey, AutoIncNativeNullable, AutoIncNullableType, NormalField, NativeNullable, NullableType
+		/// AutoIncrementPrimaryKey ,AutoIncrement, PrimaryKey,OneToOnePrimaryKey , OneToOneForeignKey, AutoIncNativeNullable, AutoIncNullableType, NormalField, NativeNullable, NullableType
 		/// </summary>
 		public static class FieldKeyType
 		{
-			public const string AutoInrcement = "AutoInrcement";
+			public const string AutoIncrement = "AutoIncrement";
 			public const string PrimaryKey = "PrimaryKey";
 
 			/// <summary>
@@ -212,7 +212,7 @@ namespace SalarDbCodeGenerator.Schema.Patterns
 			/// One-to-one the dependant foreign key, Is PrimaryKey
 			/// </summary>
 			public const string OneToOneForeignKey = "OneToOneForeignKey";
-			public const string AutoInrcementPrimaryKey = "AutoInrcementPrimaryKey";
+			public const string AutoIncrementPrimaryKey = "AutoIncrementPrimaryKey";
 			public const string AutoIncNativeNullable = "AutoIncNativeNullable";
 			public const string AutoIncNullableType = "AutoIncNullableType";
 			public const string NormalField = "NormalField";

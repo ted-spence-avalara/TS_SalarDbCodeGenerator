@@ -503,8 +503,8 @@ namespace [:Namespace:].DAL
 							<![CDATA[
 					cmd.Parameters.AddWithValue("@[:FieldNameDb:]", model.[:FieldName:]);]]>
 						</Condition>
-						<Condition Key="AutoInrcementPrimaryKey"></Condition>
-						<Condition Key="AutoInrcement"></Condition>
+						<Condition Key="AutoIncrementPrimaryKey"></Condition>
+						<Condition Key="AutoIncrement"></Condition>
 						<Condition Key="AutoIncNativeNullable"></Condition>
 						<Condition Key="AutoIncNullableType"></Condition>
 						<Condition Key="NormalField">
@@ -538,11 +538,11 @@ namespace [:Namespace:].DAL
 							<![CDATA[
 					cmd.Parameters.AddWithValue("@[:FieldNameDb:]", model.[:FieldName:]);]]>
 						</Condition>
-						<Condition Key="AutoInrcementPrimaryKey">
+						<Condition Key="AutoIncrementPrimaryKey">
 							<![CDATA[
 					cmd.Parameters.AddWithValue("@[:FieldNameDb:]", model.[:FieldName:]);]]>
 						</Condition>
-						<Condition Key="AutoInrcement"></Condition>
+						<Condition Key="AutoIncrement"></Condition>
 						<Condition Key="AutoIncNativeNullable"></Condition>
 						<Condition Key="AutoIncNullableType"></Condition>
 						<Condition Key="NormalField">

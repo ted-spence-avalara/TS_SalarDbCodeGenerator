@@ -117,7 +117,7 @@ namespace [:Namespace:].Entities
 		public virtual [:FieldDotNetType:] [:FieldName:] { get; set; }
 ]]>
 				</Condition>
-				<Condition Key="AutoInrcementPrimaryKey">
+				<Condition Key="AutoIncrementPrimaryKey">
 					<![CDATA[
 		private [:FieldDotNetType:] _[:FieldName:];
 		/// <summary>
@@ -136,7 +136,7 @@ namespace [:Namespace:].Entities
 		}
 ]]>
 				</Condition>
-				<Condition Key="AutoInrcement">
+				<Condition Key="AutoIncrement">
 					<![CDATA[
 		private [:FieldDotNetType:] _[:FieldName:];
 		/// <summary>

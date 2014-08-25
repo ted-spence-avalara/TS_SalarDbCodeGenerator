@@ -46,13 +46,13 @@ namespace [:Namespace:].Entities.DataAnnotations
 		public [:FieldDotNetType:] [:FieldName:] { get; set; }
 ]]>
 		</Condition>
-		<Condition Key="AutoInrcementPrimaryKey">
+		<Condition Key="AutoIncrementPrimaryKey">
 			<![CDATA[
 		[Display(Name = "[:FieldDescription:]")]
 		public [:FieldDotNetType:] [:FieldName:] { get; set; }
 ]]>
 		</Condition>
-		<Condition Key="AutoInrcement">
+		<Condition Key="AutoIncrement">
 			<![CDATA[
 		[Display(Name = "[:FieldDescription:]")]
 		public [:FieldDotNetType:] [:FieldName:] { get; set; }

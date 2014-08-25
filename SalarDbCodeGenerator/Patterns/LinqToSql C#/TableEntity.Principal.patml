@@ -134,7 +134,7 @@ namespace [:Namespace:].Entities
 		[Column(Name="[[:FieldNameDb:]]", IsPrimaryKey = [:FieldIsPrimaryKey:], IsDbGenerated = false, CanBeNull = [:FieldCanBeNull:], DbType = "[:FieldDbTypeSize:]")]
 		public [:FieldDotNetType:] [:FieldName:] { get; set; }]]>
 				</Condition>
-				<Condition Key="AutoInrcementPrimaryKey">
+				<Condition Key="AutoIncrementPrimaryKey">
 					<![CDATA[
 		/// <summary>
 		/// [:FieldDescription:]
@@ -143,7 +143,7 @@ namespace [:Namespace:].Entities
 		[Column(Name="[[:FieldNameDb:]]", IsPrimaryKey = [:FieldIsPrimaryKey:], IsDbGenerated = true, CanBeNull = [:FieldCanBeNull:], DbType = "[:FieldDbTypeSize:]")]
 		public [:FieldDotNetType:] [:FieldName:] { get; set; }]]>
 				</Condition>
-				<Condition Key="AutoInrcement">
+				<Condition Key="AutoIncrement">
 					<![CDATA[
 		/// <summary>
 		/// [:FieldDescription:]

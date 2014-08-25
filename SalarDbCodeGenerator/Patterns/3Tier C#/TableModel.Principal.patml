@@ -114,11 +114,11 @@ namespace [:Namespace:].Model
 					<![CDATA[
 		private [:FieldDotNetType:] _[:FieldName:];]]>
 				</Condition>
-				<Condition Key="AutoInrcementPrimaryKey">
+				<Condition Key="AutoIncrementPrimaryKey">
 					<![CDATA[
 		private [:FieldDotNetType:] _[:FieldName:];]]>
 				</Condition>
-				<Condition Key="AutoInrcement">
+				<Condition Key="AutoIncrement">
 					<![CDATA[
 		private [:FieldDotNetType:] _[:FieldName:];]]>
 				</Condition>
@@ -171,7 +171,7 @@ namespace [:Namespace:].Model
 			set { _[:FieldName:] = value; }
 		}]]>
 				</Condition>
-				<Condition Key="AutoInrcementPrimaryKey">
+				<Condition Key="AutoIncrementPrimaryKey">
 					<![CDATA[
 		/// <summary>
 		/// [:FieldDescription:]
@@ -182,7 +182,7 @@ namespace [:Namespace:].Model
 			set { _[:FieldName:] = value; }
 		}]]>
 				</Condition>
-				<Condition Key="AutoInrcement">
+				<Condition Key="AutoIncrement">
 					<![CDATA[
 		/// <summary>
 		/// [:FieldDescription:]

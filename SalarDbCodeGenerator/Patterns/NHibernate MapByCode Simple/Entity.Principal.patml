@@ -109,7 +109,7 @@ namespace [:Namespace:].Entities
 		public virtual [:FieldDotNetType:] [:FieldName:] { get; set; }
 ]]>
 				</Condition>
-				<Condition Key="AutoInrcementPrimaryKey">
+				<Condition Key="AutoIncrementPrimaryKey">
 					<![CDATA[
 		/// <summary>
 		/// [:FieldDescription:]
@@ -119,7 +119,7 @@ namespace [:Namespace:].Entities
 		public virtual [:FieldDotNetType:] [:FieldName:] { get; set; }
 ]]>
 				</Condition>
-				<Condition Key="AutoInrcement">
+				<Condition Key="AutoIncrement">
 					<![CDATA[
 		/// <summary>
 		/// [:FieldDescription:]

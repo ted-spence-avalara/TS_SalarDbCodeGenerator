@@ -131,7 +131,7 @@ namespace [:Namespace:].Entities
 						});]]>
 				</Condition>
 				<Condition Key="OneToOneForeignKey"></Condition>
-				<Condition Key="AutoInrcementPrimaryKey">
+				<Condition Key="AutoIncrementPrimaryKey">
 					<![CDATA[
 					mp.Id(
 						x => x.[:FieldName:],
@@ -141,7 +141,7 @@ namespace [:Namespace:].Entities
 							map.Generator(Generators.Native);
 						});]]>
 				</Condition>
-				<Condition Key="AutoInrcement">
+				<Condition Key="AutoIncrement">
 					<![CDATA[
 					mp.Id(
 						x => x.[:FieldName:],

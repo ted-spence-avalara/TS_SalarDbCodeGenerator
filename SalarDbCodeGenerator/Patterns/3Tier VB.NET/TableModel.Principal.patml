@@ -90,11 +90,11 @@ End Namespace
 					<![CDATA[
 		Private _[:FieldName:] As [:FieldDotNetType:]]]>
 				</Condition>
-				<Condition Key="AutoInrcementPrimaryKey">
+				<Condition Key="AutoIncrementPrimaryKey">
 					<![CDATA[
 		Private _[:FieldName:] As [:FieldDotNetType:]]]>
 				</Condition>
-				<Condition Key="AutoInrcement">
+				<Condition Key="AutoIncrement">
 					<![CDATA[
 		Private _[:FieldName:] As [:FieldDotNetType:]]]>
 				</Condition>
@@ -153,7 +153,7 @@ End Namespace
 			End Set
 		End Property]]>
 				</Condition>
-				<Condition Key="AutoInrcementPrimaryKey">
+				<Condition Key="AutoIncrementPrimaryKey">
 					<![CDATA[
 		''' <summary>
 		''' [:FieldDescription:]
@@ -167,7 +167,7 @@ End Namespace
 			End Set
 		End Property]]>
 				</Condition>
-				<Condition Key="AutoInrcement">
+				<Condition Key="AutoIncrement">
 					<![CDATA[
 		''' <summary>
 		''' [:FieldDescription:]
