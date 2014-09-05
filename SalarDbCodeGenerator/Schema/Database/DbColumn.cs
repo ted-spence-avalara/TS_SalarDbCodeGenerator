@@ -65,6 +65,8 @@ namespace SalarDbCodeGenerator.Schema.Database
 			}
 		}
 
+        public string FieldNameDbEscaped { get; set; }
+
 		/// <summary>
 		/// Field name in the schema, after duplicate checks. Renamed name.
 		/// </summary>
@@ -107,10 +109,12 @@ namespace SalarDbCodeGenerator.Schema.Database
 		#endregion
 
 		#region public methods
-		public DbColumn(string fieldName)
+		public DbColumn(string fieldName, string fieldNameEscaped)
 		{
 			FieldNameDb = fieldName;
+            FieldNameDbEscaped = fieldNameEscaped;
 		}
+
 		public bool IsArray(string arrayIndicator)
 		{
 			return this.DataTypeDotNet.Contains(arrayIndicator);

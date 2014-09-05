@@ -308,7 +308,7 @@ namespace SalarDbCodeGenerator.Schema.DbSchemaReaders
 				foreach (DataRow dr in columnsDbTypeTable.Rows)
 				{
 					string columnName = dr["COLUMN_NAME"].ToString();
-					var column = new DbColumn(columnName)
+                    var column = new DbColumn(columnName, columnName)
 					{
 						DataTypeDb = dr["DATA_TYPE"].ToString(),
 						Length = Common.TryConvertInt32(dr["CHARACTER_MAXIMUM_LENGTH"].ToString(), 0),

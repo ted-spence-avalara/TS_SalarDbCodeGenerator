@@ -308,7 +308,7 @@ namespace SalarDbCodeGenerator.Schema.DbSchemaReaders
 					foreach (DataRow dr in columnsSchema.Rows)
 					{
 						string columnName = dr["ColumnName"].ToString();
-						DbColumn column = new DbColumn(columnName)
+						DbColumn column = new DbColumn(columnName, "[" + columnName + "]")
 						{
 							DataTypeDotNet = dr["DataType"].ToString(),
 							Length = Convert.ToInt32(dr["ColumnSize"]),

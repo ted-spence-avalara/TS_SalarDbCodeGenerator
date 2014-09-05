@@ -49,8 +49,9 @@ namespace SalarDbCodeGenerator.GeneratorEngine
 		public const string FieldDbSize = "[:FieldDbSize:]";
 		public const string FieldDataType = "[:FieldDotNetType:]";
 		public const string FieldName = "[:FieldName:]";
-		public const string FieldNameDb = "[:FieldNameDb:]";
-		public const string FieldDescription = "[:FieldDescription:]";
+        public const string FieldNameDb = "[:FieldNameDb:]";
+        public const string FieldNameDbEscaped = "[:FieldNameDbEscaped:]";
+        public const string FieldDescription = "[:FieldDescription:]";
 
 		public const string FieldOrdinalValue = "[:FieldOrdinalValue:]";
 		public const string FieldIsPrimaryKey = "[:FieldIsPrimaryKey:]";

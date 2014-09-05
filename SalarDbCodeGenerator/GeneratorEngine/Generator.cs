@@ -1126,7 +1126,8 @@ namespace SalarDbCodeGenerator.GeneratorEngine
 			// column information
 			content = Common.ReplaceExIgnoreCase(content, ReplaceConsts.FieldDataType, column.DataTypeDotNet);
 			content = Common.ReplaceExIgnoreCase(content, ReplaceConsts.FieldName, column.FieldNameSchema);
-			content = Common.ReplaceExIgnoreCase(content, ReplaceConsts.FieldNameDb, column.FieldNameDb);
+            content = Common.ReplaceExIgnoreCase(content, ReplaceConsts.FieldNameDb, column.FieldNameDb);
+            content = Common.ReplaceExIgnoreCase(content, ReplaceConsts.FieldNameDbEscaped, column.FieldNameDbEscaped);
 
 			content = Common.ReplaceExIgnoreCase(content, ReplaceConsts.FieldOrdinalValue, column.ColumnOrdinal.ToString());
 			content = Common.ReplaceExIgnoreCase(content, ReplaceConsts.FieldIsPrimaryKey, column.PrimaryKey.ToString().ToLower());

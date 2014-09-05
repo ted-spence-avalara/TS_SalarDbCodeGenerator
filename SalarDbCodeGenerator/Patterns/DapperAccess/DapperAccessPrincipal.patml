@@ -256,7 +256,7 @@ namespace [:Namespace:].Entities
 							<![CDATA[
 		public [:TableName:] GetBy[:FieldName:]([:FieldDotNetType:] [:FieldName:])
 		{
-			return Query<[:TableName:]>(SqlSelectCommand + " WHERE [:FieldNameDb:]=[:ProviderSPParamPrefix:][:FieldName:]", new { [:FieldName:] = [:FieldName:] }).FirstOrDefault();
+			return Query<[:TableName:]>(SqlSelectCommand + " WHERE [:FieldNameDbEscaped:]=[:ProviderSPParamPrefix:][:FieldName:]", new { [:FieldName:] = [:FieldName:] }).FirstOrDefault();
 		}
 ]]>
 						</Condition>
@@ -264,7 +264,7 @@ namespace [:Namespace:].Entities
 							<![CDATA[
 		public [:TableName:] GetBy[:FieldName:]([:FieldDotNetType:] [:FieldName:])
 		{
-			return Query<[:TableName:]>(SqlSelectCommand + " WHERE [:FieldNameDb:]=[:ProviderSPParamPrefix:][:FieldName:]", new { [:FieldName:] = [:FieldName:] }).FirstOrDefault();
+			return Query<[:TableName:]>(SqlSelectCommand + " WHERE [:FieldNameDbEscaped:]=[:ProviderSPParamPrefix:][:FieldName:]", new { [:FieldName:] = [:FieldName:] }).FirstOrDefault();
 		}
 ]]>
 						</Condition>
@@ -272,7 +272,7 @@ namespace [:Namespace:].Entities
 							<![CDATA[
 		public [:TableName:] GetBy[:FieldName:]([:FieldDotNetType:] [:FieldName:])
 		{
-			return Query<[:TableName:]>(SqlSelectCommand + " WHERE [:FieldNameDb:]=[:ProviderSPParamPrefix:][:FieldName:]", new { [:FieldName:] = [:FieldName:] }).FirstOrDefault();
+			return Query<[:TableName:]>(SqlSelectCommand + " WHERE [:FieldNameDbEscaped:]=[:ProviderSPParamPrefix:][:FieldName:]", new { [:FieldName:] = [:FieldName:] }).FirstOrDefault();
 		}
 ]]>
 						</Condition>
@@ -283,7 +283,7 @@ namespace [:Namespace:].Entities
 							<![CDATA[
 		public [:TableName:] GetBy[:FieldName:]([:FieldDotNetType:] [:FieldName:])
 		{
-			return Query<[:TableName:]>(SqlSelectCommand + " WHERE [:FieldNameDb:]=[:ProviderSPParamPrefix:][:FieldName:]", new { [:FieldName:] = [:FieldName:] }).FirstOrDefault();
+			return Query<[:TableName:]>(SqlSelectCommand + " WHERE [:FieldNameDbEscaped:]=[:ProviderSPParamPrefix:][:FieldName:]", new { [:FieldName:] = [:FieldName:] }).FirstOrDefault();
 		}
 ]]>
 						</Condition>
@@ -370,15 +370,15 @@ namespace [:Namespace:].Entities
 							<![CDATA[ , ]]>
 						</ItemsSeperator>
 						<Condition Key="OneToOnePrimaryKey"></Condition>
-						<Condition Key="OneToOneForeignKey"><![CDATA[[[:FieldNameDb:]]]]></Condition>
+						<Condition Key="OneToOneForeignKey"><![CDATA[[:FieldNameDbEscaped:]]]></Condition>
 						<Condition Key="AutoIncrementPrimaryKey"></Condition>
 						<Condition Key="AutoIncrement"></Condition>
 						<Condition Key="AutoIncNativeNullable"></Condition>
 						<Condition Key="AutoIncNullableType"></Condition>
-						<Condition Key="PrimaryKey"><![CDATA[[[:FieldNameDb:]]]]></Condition>
-						<Condition Key="NormalField"><![CDATA[[[:FieldNameDb:]]]]></Condition>
-						<Condition Key="NativeNullable"><![CDATA[[[:FieldNameDb:]]]]></Condition>
-						<Condition Key="NullableType"><![CDATA[[[:FieldNameDb:]]]]></Condition>
+						<Condition Key="PrimaryKey"><![CDATA[[:FieldNameDbEscaped:]]]></Condition>
+						<Condition Key="NormalField"><![CDATA[[:FieldNameDbEscaped:]]]></Condition>
+						<Condition Key="NativeNullable"><![CDATA[[:FieldNameDbEscaped:]]]></Condition>
+						<Condition Key="NullableType"><![CDATA[[:FieldNameDbEscaped:]]]></Condition>
 					</PatternContent>
 
 					<PatternContent Name="InsertParametersValue" ConditionKeyMode="FieldsKeyTypeAll">
@@ -402,15 +402,15 @@ namespace [:Namespace:].Entities
 							<![CDATA[ , ]]>
 						</ItemsSeperator>
 						<Condition Key="OneToOnePrimaryKey"></Condition>
-						<Condition Key="OneToOneForeignKey"><![CDATA[[[:FieldNameDb:]]=[:ProviderSPParamPrefix:][:FieldName:]]]></Condition>
+						<Condition Key="OneToOneForeignKey"><![CDATA[[:FieldNameDbEscaped:]=[:ProviderSPParamPrefix:][:FieldNameDb:]]]></Condition>
 						<Condition Key="AutoIncrementPrimaryKey"></Condition>
 						<Condition Key="AutoIncrement"></Condition>
 						<Condition Key="AutoIncNativeNullable"></Condition>
 						<Condition Key="AutoIncNullableType"></Condition>
-						<Condition Key="PrimaryKey"><![CDATA[[[:FieldNameDb:]]=[:ProviderSPParamPrefix:][:FieldName:]]]></Condition>
-						<Condition Key="NormalField"><![CDATA[[[:FieldNameDb:]]=[:ProviderSPParamPrefix:][:FieldName:]]]></Condition>
-						<Condition Key="NativeNullable"><![CDATA[[[:FieldNameDb:]]=[:ProviderSPParamPrefix:][:FieldName:]]]></Condition>
-						<Condition Key="NullableType"><![CDATA[[[:FieldNameDb:]]=[:ProviderSPParamPrefix:][:FieldName:]]]></Condition>
+						<Condition Key="PrimaryKey"><![CDATA[[:FieldNameDbEscaped:]=[:ProviderSPParamPrefix:][:FieldNameDb:]]]></Condition>
+						<Condition Key="NormalField"><![CDATA[[:FieldNameDbEscaped:]=[:ProviderSPParamPrefix:][:FieldNameDb:]]]></Condition>
+						<Condition Key="NativeNullable"><![CDATA[[:FieldNameDbEscaped:]=[:ProviderSPParamPrefix:][:FieldNameDb:]]]></Condition>
+						<Condition Key="NullableType"><![CDATA[[:FieldNameDbEscaped:]=[:ProviderSPParamPrefix:][:FieldNameDb:]]]></Condition>
 					</PatternContent>
 
 					<PatternContent Name="PrimaryKeyParameters" ConditionKeyMode="FieldsKeyTypeAll">
@@ -418,19 +418,19 @@ namespace [:Namespace:].Entities
 							<![CDATA[ AND ]]>
 						</ItemsSeperator>
 						<Condition Key="OneToOnePrimaryKey">
-							<![CDATA[[:FieldNameDb:]=[:ProviderSPParamPrefix:][:FieldName:]]]>
+							<![CDATA[[:FieldNameDbEscaped:]=[:ProviderSPParamPrefix:][:FieldName:]]]>
 						</Condition>
 						<Condition Key="OneToOneForeignKey">
-							<![CDATA[[:FieldNameDb:]=[:ProviderSPParamPrefix:][:FieldName:]]]>
+							<![CDATA[[:FieldNameDbEscaped:]=[:ProviderSPParamPrefix:][:FieldName:]]]>
 						</Condition>
 						<Condition Key="AutoIncrementPrimaryKey">
-							<![CDATA[[:FieldNameDb:]=[:ProviderSPParamPrefix:][:FieldName:]]]>
+							<![CDATA[[:FieldNameDbEscaped:]=[:ProviderSPParamPrefix:][:FieldName:]]]>
 						</Condition>
 						<Condition Key="AutoIncrement"></Condition>
 						<Condition Key="AutoIncNativeNullable"></Condition>
 						<Condition Key="AutoIncNullableType"></Condition>
 						<Condition Key="PrimaryKey">
-							<![CDATA[[:FieldNameDb:]=[:ProviderSPParamPrefix:][:FieldName:]]]>
+							<![CDATA[[:FieldNameDbEscaped:]=[:ProviderSPParamPrefix:][:FieldName:]]]>
 						</Condition>
 						<Condition Key="NormalField"></Condition>
 						<Condition Key="NativeNullable"></Condition>
