@@ -89,6 +89,10 @@ namespace SalarDbCodeGenerator.GeneratorEngine
 		public const string TableOwnerName = "[:TableOwnerName:]";
 		public const string TableOwnerNameAsPrefix = "[:TableOwnerNameAsPrefix:]";
 
+        // Insert With Id information
+        public const string InsertWithIdValuesStatement = "[:InsertWithIdValuesStatement:]";
+        public const string InsertWithIdSuffix = "[:InsertWithIdSuffix:]";
+
 		// ForeignKeys
 		public const string LocalTableName = "[:LocalTableName:]";
 		public const string LocalTableNameDb = "[:LocalTableNameDb:]";

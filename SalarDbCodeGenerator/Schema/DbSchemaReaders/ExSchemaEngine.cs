@@ -85,5 +85,15 @@ namespace SalarDbCodeGenerator.Schema.DbSchemaReaders
 		}
 
 
-	}
+
+        public virtual string GetInsertWithIdValues()
+        {
+            return " VALUES ";
+        }
+
+        public virtual string GetInsertWithSuffix()
+        {
+            return "; SELECT SCOPE_IDENTITY(); ";
+        }
+    }
 }

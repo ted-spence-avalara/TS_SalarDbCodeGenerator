@@ -224,8 +224,7 @@ namespace [:Namespace:].Entities
 		/// <returns>[:PrimaryKeyName:] from OUTPUT inserted.</returns>
         public [:PrimaryKeyDotNetType:] InsertWithId([:TableName:] model)
         {
-            string newsql = SqlInsertCommand.Replace(") VALUES (", ") OUTPUT inserted.[:PrimaryKeyName:] VALUES (");
-            var result = Query<[:PrimaryKeyDotNetType:]>(newsql, model);
+            var result = Query<[:PrimaryKeyDotNetType:]>(SqlInsertWithIdCommand, model);
             ResetCache();
             return result.FirstOrDefault();
         }
@@ -362,6 +361,7 @@ namespace [:Namespace:].Entities
 		public const string SqlInsertCommand = "INSERT INTO " + SqlTableName + " ([#InsertParametersName#]) VALUES ([#InsertParametersValue#]) ";
 		public const string SqlUpdateCommand = "UPDATE " + SqlTableName + " SET [#UpdateParameters#] WHERE [#PrimaryKeyParameters#]";
 		public const string SqlDeleteCommand = "DELETE FROM " + SqlTableName + " WHERE [#PrimaryKeyParameters#]";
+		public const string SqlInsertWithIdCommand = "INSERT INTO " + SqlTableName + " ([#InsertParametersName#]) [:InsertWithIdValuesStatement:] ([#InsertParametersValue#]) [:InsertWithIdSuffix:]";
 		]]>
 				</Condition>
 				<ConditionContents>

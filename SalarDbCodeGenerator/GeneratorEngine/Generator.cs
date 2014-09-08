@@ -1076,7 +1076,12 @@ namespace SalarDbCodeGenerator.GeneratorEngine
 			else
 				content = Common.ReplaceExIgnoreCase(content, ReplaceConsts.AutoIncrementDataType, autoKey.DataTypeDotNet);
 
-			if (primaryKey == null)
+            // InsertWithId replacements - must be done first so primary key can replace after
+            content = Common.ReplaceExIgnoreCase(content, ReplaceConsts.InsertWithIdValuesStatement, _schemaEngine.GetInsertWithIdValues());
+            content = Common.ReplaceExIgnoreCase(content, ReplaceConsts.InsertWithIdSuffix, _schemaEngine.GetInsertWithSuffix());
+
+            // Primary key replacements - must be done after insert with id replacements
+            if (primaryKey == null)
 			{
 				content = Common.ReplaceExIgnoreCase(content, ReplaceConsts.PrimaryKeyDbType, "");
 				content = Common.ReplaceExIgnoreCase(content, ReplaceConsts.PrimaryKeyDbTypeSize, "");
@@ -1094,6 +1099,7 @@ namespace SalarDbCodeGenerator.GeneratorEngine
 				content = Common.ReplaceExIgnoreCase(content, ReplaceConsts.PrimaryKeyNameDb, primaryKey.FieldNameDb);
 				content = Common.ReplaceExIgnoreCase(content, ReplaceConsts.PrimaryKeySequenceName, primaryKey.SequenceName ?? "");
 			}
+
 			return content;
 		}
 

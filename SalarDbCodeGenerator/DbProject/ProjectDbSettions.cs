@@ -231,7 +231,7 @@ namespace SalarDbCodeGenerator.DbProject
 					break;
 
 				case DatabaseProvider.MySql:
-					connStr = string.Format("server={0};Port=3306;Database={1};User Id={2};Password={3}",
+                    connStr = string.Format("server={0};Port=3306;Allow Zero Datetime=true;Database={1};User Id={2};Password={3}",
 						ServerName,
 						DatabaseName,
 						SqlUsername,

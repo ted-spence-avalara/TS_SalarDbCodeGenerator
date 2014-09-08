@@ -856,5 +856,12 @@ WHERE INFORMATION_SCHEMA.COLUMNS.TABLE_SCHEMA = DATABASE()";
 			return DbForeignKeyAction.NotSet;
 		}
 		#endregion
-	}
+
+        #region Insert with ID customization
+        public override string GetInsertWithSuffix()
+        {
+            return "; SELECT LAST_INSERT_ID();";
+        }
+        #endregion
+    }
 }

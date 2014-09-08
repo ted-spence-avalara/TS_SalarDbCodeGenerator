@@ -973,5 +973,17 @@ namespace SalarDbCodeGenerator.Schema.DbSchemaReaders
 			return DbForeignKeyAction.NotSet;
 		}
 		#endregion
-	}
+
+        #region Insert with ID statements
+        public override string GetInsertWithIdValues()
+        {
+            return " OUTPUT inserted.[:PrimaryKeyName:] VALUES ";
+        }
+
+        public override string GetInsertWithSuffix()
+        {
+            return ";";
+        }
+        #endregion
+    }
 }
