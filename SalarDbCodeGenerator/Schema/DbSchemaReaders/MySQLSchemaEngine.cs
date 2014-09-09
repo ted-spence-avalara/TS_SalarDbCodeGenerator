@@ -298,6 +298,11 @@ namespace SalarDbCodeGenerator.Schema.DbSchemaReaders
 							ColumnOrdinal = Convert.ToInt32(dr["ColumnOrdinal"]),
 							DataTypeMaxLength = Convert.ToInt32(dr["ColumnSize"]),                            
 						};
+
+                        // Fixup MySqlDateTime - dapper automatically converts that object
+                        if (column.DataTypeDotNet.IndexOf("MySql.Data.Types.MySqlDateTime") >= 0) {
+                            column.DataTypeDotNet = "DateTime";
+                        }
 						column.FieldNameSchema = DbSchemaNames.FieldName_RemoveInvalidChars(column.FieldNameSchema);
 
 						// Columns which needs additional fetch
