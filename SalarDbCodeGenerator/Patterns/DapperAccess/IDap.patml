@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<PatternFile>
+    <Name>DapperAccess base</Name>
+    <Description>DapperAccess base pattern</Description>
+    <Options
+		Group="Base"
+		AppliesTo="General"
+		Overwrite="true"
+		FilePath="Base\IDap.cs"
+		Language="C#"
+		/>
+    <BaseContent>
+        <![CDATA[using System;
+using System.Collections.Generic;
+
+namespace [:Namespace:].Base
+{
+    public interface IDap<in T>
+    {
+        void Update(T model);
+        void Update(IEnumerable<T> model);
+
+        void Insert(T model);
+        void Insert(IEnumerable<T> model);        
+    }	
+}
+]]>
+    </BaseContent>
+</PatternFile>

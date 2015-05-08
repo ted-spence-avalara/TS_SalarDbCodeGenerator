@@ -30,7 +30,7 @@ namespace [:Namespace:].Entities
 		<BaseContent>[:InnerContent:]</BaseContent>
 		<Condition Key="TheReplacement">
 			<![CDATA[
-	public partial class [:TableName:]Dap : BaseDap
+    [#ClassDeclaration#]	
 	{
 		public [:TableName:]Dap()
 		{
@@ -52,6 +52,11 @@ namespace [:Namespace:].Entities
 			Transaction = dapProvider.Transaction;
 			Connection = dapProvider.Connection;
 		}
+
+        public override string GetSqlTableName()
+        {
+            return SqlTableName;
+        }
 
 		public List<[:TableName:]> GetTop(int count)
 		{
@@ -187,7 +192,19 @@ namespace [:Namespace:].Entities
 				</Condition>
 			</PatternContent>
 
-			<PatternContent Name="UpdatableTable" ConditionKeyMode="TablePrimaryKey">
+            <PatternContent Name="ClassDeclaration" ConditionKeyMode="TablePrimaryKey">
+                <Condition Key="WithPrimaryKey">
+                <![CDATA[public partial class [:TableName:]Dap : BaseDap, IDapWith[:PrimaryKeyDotNetType:]PrimaryKey<[:TableName:]>]]>
+                </Condition>
+                <Condition Key="ReadOnlyTable">
+                    <![CDATA[public partial class [:TableName:]Dap : BaseDap]]>
+                </Condition>
+                <Condition Key="NoPrimaryKey">
+                    <![CDATA[public partial class [:TableName:]Dap : BaseDap]]>
+                </Condition>
+            </PatternContent>
+
+                <PatternContent Name="UpdatableTable" ConditionKeyMode="TablePrimaryKey">
 				<Condition Key="ReadOnlyTable"></Condition>
 				<Condition Key="NoPrimaryKey">
 					<![CDATA[
@@ -201,7 +218,17 @@ namespace [:Namespace:].Entities
 		{
 			Execute(SqlInsertCommand, models);
             ResetCache();
-		}]]>
+		}
+        
+        public override bool HasPrimaryKey()
+        {
+            return false;
+        }
+
+        public override string GetPrimaryKeyFieldName()
+        {
+            return null;
+        }]]>
 				</Condition>
 				<Condition Key="WithPrimaryKey">
 					<![CDATA[
@@ -245,7 +272,18 @@ namespace [:Namespace:].Entities
 		{
 			Execute(SqlUpdateCommand, models);
             ResetCache();
-		}]]>
+		}
+        
+        public override bool HasPrimaryKey()
+        {
+            return true;
+        }
+
+        public override string GetPrimaryKeyFieldName()
+        {
+            return "[:PrimaryKeyName:]";
+        }
+        ]]>
 				</Condition>
 
 				<ConditionContents>

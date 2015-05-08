@@ -5,7 +5,7 @@
 	<Options
 		Group="Base"
 		AppliesTo="General"
-		Overwrite="false"
+		Overwrite="true"
 		FilePath="Base\BaseDap.cs"
 		Language="C#"
 		/>
@@ -19,7 +19,7 @@ using [:ProviderClassReferenceName:];
 
 namespace [:Namespace:].Base
 {
-	public partial class BaseDap : IDisposable
+	public abstract partial class BaseDap : IDisposable
 	{
 		private IDbConnection _connection;
 		private IDbTransaction _transaction;
@@ -34,7 +34,7 @@ namespace [:Namespace:].Base
 			get { return _connection; }
 			protected set { _connection = value; }
 		}
-
+        
 		public IDbTransaction Transaction
 		{
 			get { return _transaction; }
@@ -45,6 +45,12 @@ namespace [:Namespace:].Base
 					_connection = _transaction.Connection;
 			}
 		}
+
+        public abstract string GetSqlTableName();
+
+        public abstract bool HasPrimaryKey();
+
+        public abstract string GetPrimaryKeyFieldName();
 
 		public IDbTransaction BeginTransaction()
 		{

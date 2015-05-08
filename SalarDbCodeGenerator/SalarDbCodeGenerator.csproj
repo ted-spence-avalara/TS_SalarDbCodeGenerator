@@ -301,6 +301,7 @@
     </None>
     <None Include="Patterns\DapperAccess\BaseDap.patml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
     </None>
     <None Include="Patterns\DapperAccess\BaseModel.patml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -321,6 +322,16 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Patterns\DapperAccess\DapperSqlMapper.patml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Patterns\DapperAccess\IDap.patml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Patterns\DapperAccess\IDapWithInt32PrimaryKey.patml">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Patterns\DapperAccess\IDapWithInt64PrimaryKey.patml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Patterns\DapperAccess\VS2010ClassProject.patml">

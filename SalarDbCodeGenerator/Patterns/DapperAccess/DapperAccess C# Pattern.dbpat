@@ -101,5 +101,8 @@
 	<PatternFile Action="Generate">DapperSqlMapper.patml</PatternFile>
 	<PatternFile Action="Generate">DapperEntityPrincipal.patml</PatternFile>
 	<PatternFile Action="Generate">DapperEntityUser.patml</PatternFile>
+    <PatternFile Action="Generate">IDap.patml</PatternFile>
+    <PatternFile Action="Generate">IDapWithInt32PrimaryKey.patml</PatternFile>
+    <PatternFile Action="Generate">IDapWithInt64PrimaryKey.patml</PatternFile>
 	<PatternFile Action="Generate">VS2010ClassProject.patml</PatternFile>
 </PatternProject>
