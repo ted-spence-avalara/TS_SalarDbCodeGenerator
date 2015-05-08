@@ -104,5 +104,6 @@
     <PatternFile Action="Generate">IDap.patml</PatternFile>
     <PatternFile Action="Generate">IDapWithInt32PrimaryKey.patml</PatternFile>
     <PatternFile Action="Generate">IDapWithInt64PrimaryKey.patml</PatternFile>
+    <PatternFile Action="Generate">SafeFetch.patml</PatternFile>
 	<PatternFile Action="Generate">VS2010ClassProject.patml</PatternFile>
 </PatternProject>

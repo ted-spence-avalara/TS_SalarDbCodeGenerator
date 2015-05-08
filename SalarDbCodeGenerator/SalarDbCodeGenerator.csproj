@@ -334,6 +334,9 @@
     <None Include="Patterns\DapperAccess\IDapWithInt64PrimaryKey.patml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Patterns\DapperAccess\SafeFetch.patml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Patterns\DapperAccess\VS2010ClassProject.patml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

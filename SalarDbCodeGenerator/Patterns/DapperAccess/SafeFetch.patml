@@ -1,0 +1,562 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<PatternFile>
+    <Name>DapperAccess base</Name>
+    <Description>DapperAccess base pattern</Description>
+    <Options
+		Group="Base"
+		AppliesTo="General"
+		Overwrite="true"
+		FilePath="Base\SafeFetch.cs"
+		Language="C#"
+		/>
+    <BaseContent>
+        <![CDATA[using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Data.SqlClient;
+using Dapper;
+using System.Reflection;
+
+namespace [:Namespace:].Base
+{
+    public enum SortDirection { Ascending, Descending };
+
+    /// <summary>
+    /// Static class that provides SQL-injection-proof queries and deletes for Dapper classes
+    /// </summary>
+    public class SafeFetch
+    {
+        /// <summary>
+        /// Use SQL-Injection safe querying with a filter
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="dap"></param>
+        /// <param name="filter"></param>
+        /// <param name="table_name"></param>
+        /// <returns></returns>
+        private static List<T> InternalSafeQuery<T>(BaseDap dap, string filter, string fieldsToLoad, List<SortInfo> orderby, int start_index, int max_results, int? query_timeout, string table_name)
+        {
+            // First check the field are from valid entity fields
+            if (!string.IsNullOrEmpty(fieldsToLoad) && !fieldsToLoad.Equals("*"))
+            {
+                string[] fieldNames = fieldsToLoad.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                Type entityType = typeof(T);
+                foreach (var fieldName in fieldNames)
+                {
+                    if (fieldName == "*") continue;
+                    PropertyInfo property = entityType.GetProperty(fieldName.Trim());
+                    if (property == null)
+                    {
+                        throw new Exception(String.Format("The field name {0} is not recognized.", fieldName));
+                    }
+                }
+            }
+            if (string.IsNullOrEmpty(fieldsToLoad))
+            {
+                fieldsToLoad = "*";
+            }
+
+            string query_intro = "SELECT " + fieldsToLoad + " FROM " + table_name;// +" WHERE ";
+
+            if (!string.IsNullOrEmpty(filter))
+            {
+                query_intro += " WHERE ";
+            }
+            //string query_intro = "SELECT * FROM " + table_name + " WHERE ";
+
+            // First turn this filter into a safe list of values
+            SafeFilterParser sfp = new SafeFilterParser(query_intro, filter, typeof(T), orderby);
+
+            // Now query the database and retrieve the object
+            var results = dap.Query<T>(sfp.Query, sfp.SqlParams, null, true, query_timeout, System.Data.CommandType.Text);
+            if (start_index > 0) results = results.Skip(start_index);
+            if (max_results > 0) results = results.Take(max_results);
+            return results.ToList();
+        }
+
+        /// <summary>
+        /// Convenience function for APIs that take in orderby values like "Region ASC"
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="dap"></param>
+        /// <param name="filter"></param>
+        /// <param name="orderby_and_direction_string"></param>
+        /// <param name="start_index"></param>
+        /// <param name="max_results"></param>
+        /// <param name="query_timeout"></param>
+        /// <param name="table_name"></param>
+        /// <returns></returns>
+        public static List<T> SafeQuery<T>(BaseDap dap, string filter, string fieldsToLoad, string orderby_and_direction_string, int start_index, int max_results, int? query_timeout, string table_name)
+        {
+            List<SortInfo> list = ParseSortBy(orderby_and_direction_string);
+
+            // Pass off to our real function
+            return InternalSafeQuery<T>(dap, filter, fieldsToLoad, list, start_index, max_results, query_timeout, table_name);
+        }
+
+        /// <summary>
+        /// Internal function for parsing a "sort by" string
+        /// </summary>
+        /// <param name="orderby_and_direction_string"></param>
+        /// <returns></returns>
+        public static List<SortInfo> ParseSortBy(string orderby_and_direction_string)
+        {
+            List<SortInfo> list = new List<SortInfo>();
+
+            // Did the user give a sort string?  If so, break it apart by commas
+            if (!String.IsNullOrEmpty(orderby_and_direction_string)) {
+                foreach (var s in orderby_and_direction_string.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries)) {
+                    string[] order_items = s.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                    if (order_items.Length == 2) {
+                        if (order_items[1].StartsWith("DESC", StringComparison.CurrentCultureIgnoreCase)) {
+                            list.Add(new SortInfo() { Fieldname = order_items[0], Direction = SortDirection.Descending });
+                        } else if (order_items[1].StartsWith("ASC", StringComparison.CurrentCultureIgnoreCase)) {
+                            list.Add(new SortInfo() { Fieldname = order_items[0], Direction = SortDirection.Ascending });
+                        } else {
+                            throw new Exception(String.Format("Unrecognized sort - expected ASC or DESC but found '{0}'", order_items[1]));
+                        }
+
+                    // Append this to the sort criteria
+                    } else {
+                        list.Add(new SortInfo() { Fieldname = order_items[0], Direction = SortDirection.Ascending });
+                    }
+                }
+            }
+            return list;
+        }
+
+        /// <summary>
+        /// Use SQL-Injection safe querying with a filter string
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="dap"></param>
+        /// <param name="filter"></param>
+        /// <param name="table_name"></param>
+        /// <returns></returns>
+        public static List<T> SafeQuery<T>(BaseDap dap, string filter, string table_name)
+        {
+            return InternalSafeQuery<T>(dap, filter, string.Empty, null, 0, 0, null, table_name);
+        }
+
+        /// <summary>
+        /// Use SQL-Injection safe deleting with a filter
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="dap"></param>
+        /// <param name="filter"></param>
+        /// <param name="table_name"></param>
+        /// <returns></returns>
+        public static long SafeDelete<T>(BaseDap dap, string filter, string table_name) // List<T>
+        {
+            string query_intro = "DELETE FROM " + table_name + " WHERE ";
+
+            // First turn this filter into a safe list of values
+            SafeFilterParser sfp = new SafeFilterParser(query_intro, filter, typeof(T), null);
+
+            // Return number of rows affected
+            return dap.Execute(sfp.Query, sfp.SqlParams);
+        }
+    }
+
+    #region Sort information
+    public class SortInfo
+    {
+        public string Fieldname;
+        public SortDirection Direction;
+    }
+    #endregion
+
+    #region Combination string/type class
+    public class SafeFilterInfo
+    {
+        public string Fieldname;
+        public Type Fieldtype;
+    }
+    #endregion
+
+    #region Filter Parsing
+    /// <summary>
+    /// Filter parser class that analyzes a filter against a reflected object to validate the criteria
+    /// </summary>
+    public class SafeFilterParser
+    {
+
+        #region Public Properties
+        /// <summary>
+        /// This is the SQL String you should execute.
+        /// </summary>
+        public string Query
+        {
+            get
+            {
+                return _query;
+            }
+            set
+            {
+                _query = value;
+            }
+        }
+
+        /// <summary>
+        /// This is the SQL Parameter list you should use.
+        /// </summary>
+        public DynamicParameters SqlParams
+        {
+            get
+            {
+                return _params;
+            }
+            set
+            {
+                _params = value;
+            }
+        }
+
+        /// <summary>
+        /// This is a list of SqlClient style parameters you can use
+        /// </summary>
+        public List<SqlParameter> SqlClientParams
+        {
+            get
+            {
+                return _sql_params;
+            }
+        }
+        #endregion
+
+        #region Private Variables
+        private List<string> SAFE_OPERATIONS = new List<string>(new string[] { "=", ">", ">=", "<>", "!=", "<", "<=", "BETWEEN", "IN", "LIKE", "IS" });
+
+        private List<string> _tokens = null;
+        private int _param_num = 1;
+        private string _query;
+        private List<SqlParameter> _sql_params;
+        private DynamicParameters _params;
+        private StringBuilder _sql = new StringBuilder();
+        #endregion
+
+        /// <summary>
+        /// Initializer for a defined list of safe field names
+        /// </summary>
+        /// <param name="query_intro"></param>
+        /// <param name="filter"></param>
+        /// <param name="safe_fields_list"></param>
+        /// <param name="order_by"></param>
+        public SafeFilterParser(string query_intro, string filter, SafeFilterInfo[] safe_fields_list, List<SortInfo> order_by)
+        {
+            Setup(query_intro, filter, safe_fields_list, order_by);
+        }
+
+        /// <summary>
+        /// Initializer for an entity type
+        /// </summary>
+        /// <param name="query_intro"></param>
+        /// <param name="filter"></param>
+        /// <param name="entity_type"></param>
+        /// <param name="order_by"></param>
+        public SafeFilterParser(string query_intro, string filter, Type entity_type, List<SortInfo> order_by)
+        {
+            List<SafeFilterInfo> list = new List<SafeFilterInfo>();
+            PropertyInfo[] pilist = entity_type.GetProperties();
+            foreach (var pi in pilist) {
+                list.Add(new SafeFilterInfo() { Fieldname = pi.Name, Fieldtype = pi.PropertyType });
+            }
+            Setup(query_intro, filter, list.ToArray(), order_by);
+        }
+
+        public void Setup(string query_intro, string filter, SafeFilterInfo[] safe_fields_list, List<SortInfo> order_by)
+        {
+            if (string.IsNullOrEmpty(filter))
+            {
+                Query = query_intro;
+                return;
+            }
+
+            _sql.Append(query_intro);
+
+            // First parse the incoming filter into tokens
+            SqlParams = new DynamicParameters();
+            _sql_params = new List<SqlParameter>();
+            _tokens = GenerateTokens(filter);
+
+            // While we have tokens
+            while (_tokens.Count > 0) {
+
+                // Consume one token - this is the field
+                string fieldname = NextToken();
+
+                // Allow the user to put as many connectors in as they like.  Connectors can't cause the query to be sql-injection-vulnerable.
+                while (fieldname == ")" || fieldname == "(" || String.Equals(fieldname, "AND", StringComparison.CurrentCultureIgnoreCase) || String.Equals(fieldname, "OR", StringComparison.CurrentCultureIgnoreCase)) {
+                    _sql.Append(" ");
+                    _sql.Append(fieldname);
+                    _sql.Append(" ");
+                    if (_tokens.Count == 0) {
+                        fieldname = null;
+                        break;
+                    }
+                    fieldname = NextToken();
+                }
+
+                // If fieldname comes up null, we're done
+                if (fieldname == null) break;
+
+                // Is this field in the approved list?
+                Type fieldtype = null;
+                foreach (var pi in safe_fields_list) {
+                    if (pi.Fieldname== fieldname) {
+                        fieldtype = pi.Fieldtype;
+                        break;
+                    }
+                }
+                if (fieldtype == null) {
+                    throw new Exception(String.Format("The field name {0} is not recognized.", fieldname));
+                }
+
+                _sql.Append(string.Format("[" + fieldname + "]"));
+                _sql.Append(" ");
+
+                // Next is the operation
+                // ToUpper to remove case-sensitivity
+                string op = NextToken().ToUpper();
+                if (!SAFE_OPERATIONS.Contains(op)) {
+                    throw new Exception(String.Format("The operation {0} is not recognized.", op));
+                }
+                _sql.Append(op);
+                _sql.Append(" ");
+
+                // Depending on the field type & op, let's add some parameters
+                if (op == "BETWEEN") {
+                    AddParameter(fieldtype);
+                    _sql.Append(" AND ");
+                    AddParameter(fieldtype);
+
+                // In a list of values
+                } else if (op == "IN") {
+                    Expect("(");
+                    _sql.Append("(");
+                    while (true) {
+                        AddParameter(fieldtype);
+                        string comma_or_paren = NextToken();
+                        if (comma_or_paren == ")") break;
+                        if (comma_or_paren != ",") {
+                            throw new Exception(String.Format("Expected ','.  Found '{0}'.", comma_or_paren));
+                        }
+                        _sql.Append(", ");
+                    }
+                    _sql.Append(")");
+
+                // Support for "IS NULL"
+                } else if (op == "IS") {
+                    Expect("NULL");
+                    _sql.Append(" NULL ");
+
+                // Single value
+                } else {
+                    AddParameter(fieldtype);
+                }
+            }
+
+            // Did they specify a sort?
+            if (order_by != null && order_by.Count > 0) {
+                _sql.Append(" ORDER BY ");
+                foreach (var o in order_by) {
+                    foreach (var pi in safe_fields_list) {
+                        if (String.Equals(pi.Fieldname, o.Fieldname, StringComparison.CurrentCultureIgnoreCase)) {
+                            _sql.Append(pi.Fieldname);
+                            if (o.Direction == SortDirection.Ascending) {
+                                _sql.Append(" ASC, ");
+                            } else {
+                                _sql.Append(" DESC, ");
+                            }
+                        }
+                    }
+                }
+
+                // Remove the last comma
+                _sql.Length -= 2;
+            }
+
+            // Here's your SQL
+            Query = _sql.ToString();
+        }
+
+        private void Expect(string expected_token)
+        {
+            string actual = NextToken();
+            if (!String.Equals(expected_token, actual)) {
+                throw new Exception(String.Format("Expected '{0}'.  Found '{1}'.", expected_token, actual));
+            }
+        }
+
+        #region Safe Tokenization Function
+        public static List<string> GenerateTokens(string filter)
+        {
+            List<string> tokens = new List<string>();
+            StringBuilder sb = new StringBuilder();
+
+            // Go through each character
+            int i = 0;
+            bool in_string = false;
+            bool in_token = false;
+            bool in_quotes = false;
+            List<char> token_chars_lst = new List<char> { '=', '>', '<', '(', ')', ',', '!' };
+            while (i < filter.Length) {
+                char c = filter[i];
+
+                // Whitespace characters always end a token)
+                if (Char.IsWhiteSpace(c)) {
+
+                    // ...Unless they're in quotes (ie as part of value)
+                    if (in_quotes) {
+                        sb.Append(c);
+                    } else if (in_token) {
+                        tokens.Add(sb.ToString());
+                        sb.Length = 0;
+                        in_token = false;
+                        in_string = false;
+                    }
+                }
+
+                // If this is one of the special chars (>, =, etc) end token and count char as its own token
+                if (CharIsListed(c, token_chars_lst)) {
+
+                    // Signify end of the token preceding it
+                    if (in_token) {
+                        tokens.Add(sb.ToString());
+                        in_token = false;
+                    }
+
+                    // If the token is actually part of a >= or <= block, add the equal sign to it.
+                    string s = c.ToString();
+                    if (c == '!')
+                    {
+                        if (filter[i + 1] == '=')
+                        {
+                            s += filter[i + 1];
+                            i++;
+                        }
+                    }
+                    if (c == '<')
+                    {
+                        if (filter[i + 1] == '>')
+                        {
+                            s += filter[i + 1];
+                            i++;
+                        }
+                    }
+                    if (c == '>' || c == '<') {
+                        if (filter[i + 1] == '=') {
+                            s += filter[i + 1];
+                            i++;
+                        }
+                    }
+
+                    tokens.Add(s);
+                    sb.Length = 0;
+                }
+
+                // Apostrophes trigger string mode
+                if (c == '\'') {
+                    while (i < filter.Length) {
+                        i++;
+                        c = filter[i];
+                        if (c == '\'') {
+
+                            // If there's a double apostrophe, treat it as a single one
+                            if ((i + 1 <= filter.Length - 1) && (filter[i + 1] == '\'')) {
+                                sb.Append('\'');
+                                i++;
+                            } else {
+                                tokens.Add(sb.ToString());
+                                sb.Length = 0;
+                                in_string = false;
+                                in_quotes = false;
+                                break;
+                            }
+
+                        } else {
+                            sb.Append(c);
+                        }
+                    }
+
+                    // If the string failed to end properly, throw an error
+                    if (in_string) {
+                        throw new Exception("Non-terminated string in filter.");
+                    }
+
+                    // Normal characters just get added to the token
+                } else {
+                    if (Char.IsWhiteSpace(c) == false && !CharIsListed(c, token_chars_lst)) {
+                        sb.Append(c);
+                        in_token = true;
+                    }
+                }
+
+                // Move to the next char
+                i++;
+            }
+
+            // Allow strings to end normally
+            if (in_token) {
+                tokens.Add(sb.ToString());
+            }
+
+            // Here's your tokenized list
+            return tokens;
+        }
+
+        //Checks to see if char is in list
+        private static bool CharIsListed(char c, List<char> token_chars)
+        {
+            // -1 means variable is not in list
+            if (token_chars.IndexOf(c) != -1) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        #endregion
+
+        #region Helper Functions
+        private void AddParameter(Type fieldtype)
+        {
+            if (_param_num > 1999) throw new Exception("Maximum 1999 parameters.");
+
+            // Figure out what parameter number we are
+            string pname = "@p" + _param_num.ToString();
+            _param_num++;
+            _sql.Append(pname);
+            _sql.Append(" ");
+            string token = NextToken();
+
+            // Attempt to cast this item to the specified type
+            object pvalue;
+            if (fieldtype.IsGenericType && fieldtype.GetGenericTypeDefinition() == typeof(Nullable<>)) {
+                if (String.IsNullOrEmpty(token))
+                    pvalue = null;
+                else
+                    pvalue = Convert.ChangeType(token, fieldtype.GetGenericArguments()[0]);
+            } else {
+                pvalue = Convert.ChangeType(token, fieldtype);
+            }
+
+
+            // Put this into an SQL Parameter list
+            _params.Add(pname, pvalue);
+            _sql_params.Add(new SqlParameter(pname, pvalue));
+        }
+
+        private string NextToken()
+        {
+            string v = _tokens[0];
+            _tokens.RemoveAt(0);
+            return v;
+        }
+        #endregion
+    }
+    #endregion
+}
+]]>
+    </BaseContent>
+</PatternFile>
