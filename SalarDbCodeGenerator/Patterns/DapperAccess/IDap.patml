@@ -15,13 +15,15 @@ using System.Collections.Generic;
 
 namespace [:Namespace:].Base
 {
-    public interface IDap<in T>
+    public interface IDap<T> : IDisposable
     {
         void Update(T model);
         void Update(IEnumerable<T> model);
 
         void Insert(T model);
-        void Insert(IEnumerable<T> model);        
+        void Insert(IEnumerable<T> model);
+
+        List<T> GetAll(bool forceCacheReload);
     }	
 }
 ]]>

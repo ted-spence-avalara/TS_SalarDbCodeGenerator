@@ -14,7 +14,7 @@
 
 namespace [:Namespace:].Base
 {
-    public interface IDapWithInt32PrimaryKey<in T> : IDap<T>
+    public interface IDapWithInt32PrimaryKey<T> : IDap<T>
     {
         Int32 InsertWithId(T model);
     }
