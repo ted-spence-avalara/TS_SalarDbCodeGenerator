@@ -36,9 +36,9 @@ namespace [:Namespace:].Entities
 		{
 		}
 
-		public [:TableName:]Dap(IDbConnection connection)
+		public [:TableName:]Dap(IDbConnection connection) : base(connection)
 		{
-			Connection = connection;
+			
 		}
 
 		public [:TableName:]Dap(IDbTransaction transaction)

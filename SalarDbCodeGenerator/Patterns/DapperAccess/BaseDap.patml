@@ -29,6 +29,11 @@ namespace [:Namespace:].Base
 			Connection = new [:ProviderClassConnection:](ConfigurationManager.ConnectionStrings["[:DatabaseName:].ConnectionString"].ConnectionString);
 		}
 
+        protected BaseDap(IDbConnection connection)
+		{
+			Connection = connection;
+		}
+
 		public IDbConnection Connection
 		{
 			get { return _connection; }

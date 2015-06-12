@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<PatternFile>
+    <Name>DapperAccess base</Name>
+    <Description>DapperAccess base pattern</Description>
+    <Options
+		Group="Base"
+		AppliesTo="General"
+		Overwrite="true"
+		FilePath="Base\ISafeQueryExecutor.cs"
+		Language="C#"
+		/>
+    <BaseContent>
+        <![CDATA[namespace [:Namespace:].Base
+{
+    public interface ISafeQueryExecutor
+    {
+        SafeFetchResults<T> SafeQuery<T>(BaseDap dap, string filter, string fieldsToLoad, string orderbyAndDirectionString, int startIndex, int maxResults, int? queryTimeout, string tableName);
+
+        long SafeDelete<T>(BaseDap dap, string filter, string tableName);
+
+        long Insert<T>(IDapWithInt64PrimaryKey<T> baseDap, T entity);
+
+        int Insert<T>(IDapWithInt32PrimaryKey<T> baseDap, T entity);
+
+        void Update<T>(IDap<T> dap, T entity);
+    }    
+}
+]]>
+    </BaseContent>
+</PatternFile>

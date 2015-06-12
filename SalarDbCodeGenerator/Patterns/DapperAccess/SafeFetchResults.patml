@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<PatternFile>
+    <Name>DapperAccess base</Name>
+    <Description>DapperAccess base pattern</Description>
+    <Options
+		Group="Base"
+		AppliesTo="General"
+		Overwrite="true"
+		FilePath="Base\SafeFetchResults.cs"
+		Language="C#"
+		/>
+    <BaseContent>
+        <![CDATA[using System.Collections.Generic;
+
+namespace [:Namespace:].Base
+{
+    public class SafeFetchResults<T>
+    {
+        public List<T> Values { get; set; }
+        
+        /// <summary>Indicates the 0-based starting index (inclusive) of the total results that are represented in <see cref="Values"/></summary>
+        public int StartIndex { get; set; }
+
+        /// <summary>Indicates the 0-based ending index (exclusive) of the total results that are represented in <see cref="Values"/></summary>
+        public int EndIndex { get; set; }
+
+        /// <summary>
+        /// Total number of rows that match the query regardless of the number of items in <see cref="Values"/> (<seealso cref="TotalAvailableRows"/> may be larger)
+        /// </summary>
+        public int TotalAvailableRows { get; set; }
+
+        /// <summary>
+        /// List of fields that were included in 'fieldsToLoad' but are not properties of <see cref="T"/>
+        /// </summary>
+        public List<string> UnrecognizedFields { get; set; }
+
+        public List<string> FieldsLoaded { get; set; } 
+    }
+}
+
+]]>
+    </BaseContent>
+</PatternFile>
