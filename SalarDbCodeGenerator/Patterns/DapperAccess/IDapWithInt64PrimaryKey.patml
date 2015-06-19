@@ -17,6 +17,8 @@ namespace [:Namespace:].Base
     public interface IDapWithInt64PrimaryKey<T> : IDap<T>
     {
         Int64 InsertWithId(T model);
+
+        T GetByPrimaryKey(Int64 id);
     }
 }
 ]]>

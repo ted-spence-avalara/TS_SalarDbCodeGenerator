@@ -307,6 +307,11 @@ namespace [:Namespace:].Entities
 						</Condition>
 						<Condition Key="AutoIncrementPrimaryKey">
 							<![CDATA[
+        public [:TableName:] GetByPrimaryKey([:FieldDotNetType:] id)
+        {
+            return GetBy[:FieldName:](id);
+        }
+
 		public [:TableName:] GetBy[:FieldName:]([:FieldDotNetType:] [:FieldName:])
 		{
 			return Query<[:TableName:]>(SqlSelectCommand + " WHERE [:FieldNameDbEscaped:]=[:ProviderSPParamPrefix:][:FieldName:]", new { [:FieldName:] = [:FieldName:] }).FirstOrDefault();
@@ -318,6 +323,11 @@ namespace [:Namespace:].Entities
 						<Condition Key="AutoIncNullableType"></Condition>
 						<Condition Key="PrimaryKey">
 							<![CDATA[
+        public [:TableName:] GetByPrimaryKey([:FieldDotNetType:] id)
+        {
+            return GetBy[:FieldName:](id);
+        }
+
 		public [:TableName:] GetBy[:FieldName:]([:FieldDotNetType:] [:FieldName:])
 		{
 			return Query<[:TableName:]>(SqlSelectCommand + " WHERE [:FieldNameDbEscaped:]=[:ProviderSPParamPrefix:][:FieldName:]", new { [:FieldName:] = [:FieldName:] }).FirstOrDefault();
