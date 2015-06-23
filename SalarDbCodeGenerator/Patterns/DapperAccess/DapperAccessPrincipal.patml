@@ -74,6 +74,7 @@ namespace [:Namespace:].Entities
                 lock (_cache_lock) {
                     if (_obj_cache == null || _next_cache_date < DateTime.UtcNow || force_cache_reload) {
                         _obj_cache = Query<[:TableName:]>(string.Format("SELECT * FROM {0}", SqlTableName)).ToArray();
+                        OnCache(_obj_cache);
                         _next_cache_date = DateTime.UtcNow.AddSeconds(CACHE_SECONDS);
                     }
                 }
@@ -81,11 +82,16 @@ namespace [:Namespace:].Entities
             return _obj_cache.ToList();
         }
 
+        static partial void OnCache([:TableName:][] items);
+
+        static partial void InvalidateCache();
+
         public void ResetCache()
 		{
             lock (_cache_lock) {
                 _next_cache_date = DateTime.MinValue;
                 _obj_cache = null;
+                InvalidateCache();
             }
 		}
 [#UpdatableTable#]
