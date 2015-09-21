@@ -15,7 +15,7 @@ using System.Collections.Generic;
 
 namespace [:Namespace:].Base
 {
-    public interface IDap<T> : IDisposable
+    public interface IDap<T> : IDap
     {
         void Update(T model);
         void Update(IEnumerable<T> model);
@@ -24,7 +24,13 @@ namespace [:Namespace:].Base
         void Insert(IEnumerable<T> model);
 
         List<T> GetAll(bool forceCacheReload);
-    }	
+    }
+
+    public interface IDap : IDisposable
+    {
+        string GetSqlTableName();
+        string GetPrimaryKeyFieldName();
+    }
 }
 ]]>
     </BaseContent>

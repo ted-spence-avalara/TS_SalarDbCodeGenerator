@@ -34,7 +34,9 @@ namespace [:Namespace:].Base
         /// </summary>
         public List<string> UnrecognizedFields { get; set; }
 
-        public List<string> FieldsLoaded { get; set; } 
+        public List<string> FieldsLoaded { get; set; }
+
+        public List<SortInfo> SortInfos { get; set; }
     }
 }
 

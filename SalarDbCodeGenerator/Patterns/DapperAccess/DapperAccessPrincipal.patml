@@ -32,27 +32,17 @@ namespace [:Namespace:].Entities
 			<![CDATA[
     [#ClassDeclaration#]	
 	{
-		public [:TableName:]Dap()
+		public [:TableName:]Dap(IDbConnectionFactory factory)
+            : base(factory)
 		{
 		}
 
-		public [:TableName:]Dap(IDbConnection connection) : base(connection)
+		public [:TableName:]Dap(BaseDap dapProvider) : 
+            base(dapProvider.DbConnectionFactory)
 		{
 			
 		}
-
-		public [:TableName:]Dap(IDbTransaction transaction)
-		{
-			Transaction = transaction;
-			Connection = transaction.Connection;
-		}
-
-		public [:TableName:]Dap(BaseDap dapProvider)
-		{
-			Transaction = dapProvider.Transaction;
-			Connection = dapProvider.Connection;
-		}
-
+        
         public override string GetSqlTableName()
         {
             return SqlTableName;

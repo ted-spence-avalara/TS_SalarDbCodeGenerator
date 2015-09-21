@@ -19,7 +19,7 @@ using System.Text;
 using System.Data.SqlClient;
 using Dapper;
 using System.Reflection;
-using MySql.Data.MySqlClient;
+using Npgsql;
 
 namespace [:Namespace:].Base
 {
@@ -31,29 +31,56 @@ namespace [:Namespace:].Base
     public class SafeFetch : ISafeQueryExecutor
     {
         private static readonly int DefaultDatabaseTimeout;
+        private readonly IDbConnectionFactory _dbConnectionFactory;
 
         static SafeFetch()
         {
             string value = ConfigurationManager.AppSettings["DatabaseTimeout"];
-            if(string.IsNullOrEmpty(value))
+            if (string.IsNullOrEmpty(value))
             {
-                DefaultDatabaseTimeout = 60; 
+                DefaultDatabaseTimeout = 60;
             }
             else
             {
                 DefaultDatabaseTimeout = int.Parse(value);
             }
-        }        
-
-        public SafeFetchResults<T> SafeQuery<T>(BaseDap dap, string filter, string fieldsToLoad, string orderbyAndDirectionString,
-            int startIndex, int maxResults, int? queryTimeout, string tableName)
-        {
-            return InternalSafeQuery<T>(dap, filter, fieldsToLoad, orderbyAndDirectionString, startIndex, maxResults, queryTimeout, tableName);
         }
 
-        public long SafeDelete<T>(BaseDap dap, string filter, string tableName)
+        public SafeFetch(IDbConnectionFactory dbConnectionFactory)
         {
-            return InternalSafeDelete<T>(dap, filter, tableName);
+            _dbConnectionFactory = dbConnectionFactory;
+        }
+
+        public SafeFetchResults<T> SafeQuery<T>(string filter, string fieldsToLoad, string orderbyAndDirectionString,
+            int startIndex, int maxResults, int? queryTimeout, string tableName)
+        {
+            return SafeQuery<T>(new DefaultSafeFetchQueryBuilder(), new DefaultDatabaseColumnTranslator(typeof(T)), filter, fieldsToLoad, orderbyAndDirectionString, startIndex, maxResults, queryTimeout, tableName);
+        }
+
+        public SafeFetchResults<T> SafeQuery<T>(ISafeFetchQueryBuilder builder, IDatabaseColumnTranslator databaseColumnTranslator, string filter, string fieldsToLoad, string orderbyAndDirectionString,
+            int startIndex, int maxResults, int? queryTimeout, string tableName)
+        {
+            SafeFetchQuery query = ToSafeFetchQuery(databaseColumnTranslator ?? new DefaultDatabaseColumnTranslator(typeof(T)), filter, fieldsToLoad, tableName, orderbyAndDirectionString);
+
+            return InternalSafeQuery<T>(builder ?? new DefaultSafeFetchQueryBuilder(), _dbConnectionFactory, query, startIndex, maxResults, queryTimeout);
+        }
+
+        public MultiSafeFetchResults<T1, T2, T3> SafeQuery<T1, T2, T3>(ISafeFetchQueryBuilder builder, IDatabaseColumnTranslator databaseColumnTranslator, string tableName, string filter, string fieldsToLoad, string orderbyAndDirectionString, int? queryTimeout)
+        {
+            SafeFetchQuery query = ToSafeFetchQuery(databaseColumnTranslator, filter, fieldsToLoad, tableName, orderbyAndDirectionString);
+
+            if (builder == null)
+                throw new ArgumentNullException("builder", "Must specify a ISafeFetchQueryBuilder");
+
+            if (databaseColumnTranslator == null)
+                throw new ArgumentNullException("databaseColumnTranslator", "Must specify a IDatabaseColumnTranslator");
+
+            return SafeQuery<T1, T2, T3>(builder, _dbConnectionFactory, query, queryTimeout);
+        }
+
+        public long SafeDelete<T>(string filter, string tableName)
+        {
+            return InternalSafeDelete<T>(_dbConnectionFactory, filter, tableName);
         }
 
         public long Insert<T>(IDapWithInt64PrimaryKey<T> baseDap, T entity)
@@ -71,61 +98,73 @@ namespace [:Namespace:].Base
             dap.Update(entity);
         }
 
-        /// <summary>
-        /// Use SQL-Injection safe querying with a filter
-        /// </summary>
-        private static SafeFetchResults<T> InternalSafeQuery<T>(BaseDap dap, SafeFetchQuery query, int start_index, int max_results, int? query_timeout)
+        private MultiSafeFetchResults<T1, T2, T3> SafeQuery<T1, T2, T3>(ISafeFetchQueryBuilder builder, IDbConnectionFactory dbConnectionFactory, SafeFetchQuery query, int? queryTimeout)
         {
-            SafeFetchResults<T> results = new SafeFetchResults<T>();
+            MultiSafeFetchResults<T1, T2, T3> results = new MultiSafeFetchResults<T1, T2, T3>();
+            results.SortInfos = query.Sort;
 
-            string query_intro = "SELECT " + query.ToSelectString() + " FROM " + query.Table;// +" WHERE ";
-
-            if (!string.IsNullOrEmpty(query.Filter))
+            using(Dap dap = new Dap(dbConnectionFactory))
             {
-                query_intro += " WHERE ";
+                // First turn this filter into a safe list of values
+                SafeFilterParser sfp = new SafeFilterParser();
+                sfp.Parse(query.Filter, typeof(T1), query.Sort, GetDbType(dap.Connection));
+
+                string fullQuery = builder.BuildSelectQuery(query.ToSelectString(), query.Table, sfp.Filter, sfp.OrderBy);
+
+                if (dap.Connection.State != ConnectionState.Open)
+                    dap.Connection.Open();
+
+                // Now query the database and retrieve the object
+                using (IDbTransaction trans = dap.Connection.BeginTransaction())
+                {
+                    var multi = dap.QueryMultiple(fullQuery, sfp.SqlParams, trans, queryTimeout ?? DefaultDatabaseTimeout, CommandType.Text);
+
+                    results.FirstValues = multi.Read<T1>().ToList();
+                    results.SecondValues = multi.Read<T2>().ToList();
+                    results.ThirdValues = multi.Read<T3>().ToList();
+                }
             }
-            //string query_intro = "SELECT * FROM " + table_name + " WHERE ";
 
-            // First turn this filter into a safe list of values
-            SafeFilterParser sfp = new SafeFilterParser(query_intro, query.Filter, typeof(T), query.Sort, GetDbType(dap.Connection));
-
-            // Now query the database and retrieve the object
-            List<T> allResults = (List<T>)dap.Query<T>(sfp.Query, sfp.SqlParams, null, true, query_timeout ?? DefaultDatabaseTimeout, System.Data.CommandType.Text);            
-            IEnumerable<T> partialResults = allResults.Skip(start_index);
-            if(max_results > 0)
-            {
-                partialResults = partialResults.Take(max_results);
-            }
-            
-            results.Values = partialResults.ToList();
-
-            results.StartIndex = start_index;
-            results.EndIndex = start_index + results.Values.Count;
-            results.TotalAvailableRows = allResults.Count;
+            results.StartIndex = 0;
+            results.EndIndex = results.FirstValues.Count;
+            results.TotalAvailableRows = results.FirstValues.Count;
             results.UnrecognizedFields = query.UnrecognizedSelectFields;
             results.FieldsLoaded = query.ValidSelectFields;
 
             return results;
         }
 
-        /// <summary>
-        /// Convenience function for APIs that take in orderby values like "Region ASC"
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="dap"></param>
-        /// <param name="filter"></param>
-        /// <param name="orderby_and_direction_string"></param>
-        /// <param name="start_index"></param>
-        /// <param name="max_results"></param>
-        /// <param name="query_timeout"></param>
-        /// <param name="table_name"></param>
-        /// <returns></returns>
-        internal static SafeFetchResults<T> InternalSafeQuery<T>(BaseDap dap, string filter, string fieldsToLoad, string orderby_and_direction_string, int start_index, int max_results, int? query_timeout, string table_name)
+        private static SafeFetchResults<T> InternalSafeQuery<T>(ISafeFetchQueryBuilder builder, IDbConnectionFactory dbConnectionFactory, SafeFetchQuery query, int start_index, int max_results, int? query_timeout)
         {
-            SafeFetchQuery query = ToSafeFetchQuery<T>(filter, fieldsToLoad, table_name, orderby_and_direction_string);            
+            SafeFetchResults<T> results = new SafeFetchResults<T>();
+            results.SortInfos = query.Sort;
 
-            // Pass off to our real function
-            return InternalSafeQuery<T>(dap, query, start_index, max_results, query_timeout);
+            using(Dap dap = new Dap(dbConnectionFactory))
+            {
+                // First turn this filter into a safe list of values
+                SafeFilterParser sfp = new SafeFilterParser();
+                sfp.Parse(query.Filter, typeof(T), query.Sort, GetDbType(dap.Connection));
+
+                string fullQuery = builder.BuildSelectQuery(query.ToSelectString(), query.Table, sfp.Filter, sfp.OrderBy);
+
+                // Now query the database and retrieve the object
+                List<T> allResults = (List<T>)dap.Query<T>(fullQuery, sfp.SqlParams, null, true, query_timeout ?? DefaultDatabaseTimeout, System.Data.CommandType.Text);
+                IEnumerable<T> partialResults = allResults.Skip(start_index);
+                if (max_results > 0)
+                {
+                    partialResults = partialResults.Take(max_results);
+                }
+
+                results.Values = partialResults.ToList();
+
+                results.StartIndex = start_index;
+                results.EndIndex = start_index + results.Values.Count;
+                results.TotalAvailableRows = allResults.Count;
+                results.UnrecognizedFields = query.UnrecognizedSelectFields;
+                results.FieldsLoaded = query.ValidSelectFields;
+            }
+
+            return results;
         }
 
         /// <summary>
@@ -138,40 +177,35 @@ namespace [:Namespace:].Base
             List<SortInfo> list = new List<SortInfo>();
 
             // Did the user give a sort string?  If so, break it apart by commas
-            if (!String.IsNullOrEmpty(orderby_and_direction_string)) {
-                foreach (var s in orderby_and_direction_string.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries)) {
+            if (!String.IsNullOrEmpty(orderby_and_direction_string))
+            {
+                foreach (var s in orderby_and_direction_string.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                {
                     string[] order_items = s.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                    if (order_items.Length == 2) {
-                        if (order_items[1].StartsWith("DESC", StringComparison.CurrentCultureIgnoreCase)) {
+                    if (order_items.Length == 2)
+                    {
+                        if (order_items[1].StartsWith("DESC", StringComparison.CurrentCultureIgnoreCase))
+                        {
                             list.Add(new SortInfo() { Fieldname = order_items[0], Direction = SortDirection.Descending });
-                        } else if (order_items[1].StartsWith("ASC", StringComparison.CurrentCultureIgnoreCase)) {
+                        }
+                        else if (order_items[1].StartsWith("ASC", StringComparison.CurrentCultureIgnoreCase))
+                        {
                             list.Add(new SortInfo() { Fieldname = order_items[0], Direction = SortDirection.Ascending });
-                        } else {
+                        }
+                        else
+                        {
                             throw new Exception(String.Format("Unrecognized sort - expected ASC or DESC but found '{0}'", order_items[1]));
                         }
 
-                    // Append this to the sort criteria
-                    } else {
+                        // Append this to the sort criteria
+                    }
+                    else
+                    {
                         list.Add(new SortInfo() { Fieldname = order_items[0], Direction = SortDirection.Ascending });
                     }
                 }
             }
             return list;
-        }
-
-        /// <summary>
-        /// Use SQL-Injection safe querying with a filter string
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="dap"></param>
-        /// <param name="filter"></param>
-        /// <param name="table_name"></param>
-        /// <returns></returns>
-        internal static SafeFetchResults<T> InternalSafeQuery<T>(BaseDap dap, string filter, string table_name)
-        {
-            SafeFetchQuery query = ToSafeFetchQuery<T>(filter, string.Empty, table_name, null);
-            
-            return InternalSafeQuery<T>(dap, query, 0, 0, null);
         }
 
         /// <summary>
@@ -182,26 +216,30 @@ namespace [:Namespace:].Base
         /// <param name="filter"></param>
         /// <param name="table_name"></param>
         /// <returns></returns>
-        internal static long InternalSafeDelete<T>(BaseDap dap, string filter, string table_name) // List<T>
+        internal static long InternalSafeDelete<T>(IDbConnectionFactory dbConnectionFactory, string filter, string table_name) // List<T>
         {
-            string query_intro = "DELETE FROM " + table_name + " WHERE ";
+            using(Dap dap = new Dap(dbConnectionFactory))
+            {
+                // First turn this filter into a safe list of values
+                SafeFilterParser sfp = new SafeFilterParser();
+                sfp.Parse(filter, typeof(T), null, GetDbType(dap.Connection));
 
-            // First turn this filter into a safe list of values
-            SafeFilterParser sfp = new SafeFilterParser(query_intro, filter, typeof(T), null, GetDbType(dap.Connection));
+                string query = "DELETE FROM " + table_name + " WHERE " + sfp.Filter;
 
-            // Return number of rows affected
-            return dap.Execute(sfp.Query, sfp.SqlParams);
+                // Return number of rows affected
+                return dap.Execute(query, sfp.SqlParams);    
+            }            
         }
 
         private static SafeFilterParser.DatabaseType GetDbType(IDbConnection connection)
         {
-            if(connection is MySqlConnection)
-                return SafeFilterParser.DatabaseType.Mysql;
+            if (connection is NpgsqlConnection)
+                return SafeFilterParser.DatabaseType.Postgres;
 
             return SafeFilterParser.DatabaseType.SqlServer;
         }
 
-        private static SafeFetchQuery ToSafeFetchQuery<T>(string filter, string fieldsToLoad, string table_name, string orderby_and_direction_string)
+        private static SafeFetchQuery ToSafeFetchQuery(IDatabaseColumnTranslator translator, string filter, string fieldsToLoad, string table_name, string orderby_and_direction_string)
         {
             SafeFetchQuery query = new SafeFetchQuery();
             query.Table = table_name;
@@ -212,18 +250,17 @@ namespace [:Namespace:].Base
             if (!string.IsNullOrEmpty(fieldsToLoad) && !fieldsToLoad.Equals("*"))
             {
                 string[] fieldNames = fieldsToLoad.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                Type entityType = typeof(T);
-                foreach (var fieldName in fieldNames)
+                foreach (var fieldName in fieldNames.Select(x => x.Trim()))
                 {
                     if (fieldName == "*") continue;
-                    PropertyInfo property = entityType.GetProperty(fieldName.Trim());
-                    if (property == null)
+                    string dbName = translator.ApiNameToDatabaseColumn(fieldName);
+                    if (dbName == null)
                     {
                         query.UnrecognizedSelectFields.Add(fieldName);
                     }
                     else
                     {
-                        query.ValidSelectFields.Add(fieldName);
+                        query.ValidSelectFields.Add(dbName);
                     }
                 }
             }
@@ -257,7 +294,7 @@ namespace [:Namespace:].Base
         public string ToSelectString()
         {
             return string.Join(",", ValidSelectFields);
-        } 
+        }
     }
     #endregion
 
@@ -275,22 +312,13 @@ namespace [:Namespace:].Base
     /// </summary>
     public class SafeFilterParser
     {
-
         #region Public Properties
         /// <summary>
-        /// This is the SQL String you should execute.
+        /// This is the SQL Filer you should execute.
         /// </summary>
-        public string Query
-        {
-            get
-            {
-                return _query;
-            }
-            set
-            {
-                _query = value;
-            }
-        }
+        public string Filter { get; private set; }
+
+        public string OrderBy { get; private set; }
 
         /// <summary>
         /// This is the SQL Parameter list you should use.
@@ -324,50 +352,30 @@ namespace [:Namespace:].Base
 
         private List<string> _tokens = null;
         private int _param_num = 1;
-        private string _query;
         private List<SqlParameter> _sql_params;
         private DynamicParameters _params;
         private StringBuilder _sql = new StringBuilder();
         #endregion
 
-        /// <summary>
-        /// Initializer for a defined list of safe field names
-        /// </summary>
-        /// <param name="query_intro"></param>
-        /// <param name="filter"></param>
-        /// <param name="safe_fields_list"></param>
-        /// <param name="order_by"></param>
-        public SafeFilterParser(string query_intro, string filter, SafeFilterInfo[] safe_fields_list, List<SortInfo> order_by, DatabaseType databaseType)
-        {
-            Setup(query_intro, filter, safe_fields_list, order_by, databaseType);
-        }
-
-        /// <summary>
-        /// Initializer for an entity type
-        /// </summary>
-        /// <param name="query_intro"></param>
-        /// <param name="filter"></param>
-        /// <param name="entity_type"></param>
-        /// <param name="order_by"></param>
-        public SafeFilterParser(string query_intro, string filter, Type entity_type, List<SortInfo> order_by, DatabaseType databaseType)
+        public void Parse(string filter, Type entity_type, List<SortInfo> order_by, DatabaseType databaseType)
         {
             List<SafeFilterInfo> list = new List<SafeFilterInfo>();
             PropertyInfo[] pilist = entity_type.GetProperties();
-            foreach (var pi in pilist) {
-                list.Add(new SafeFilterInfo() { Fieldname = pi.Name, Fieldtype = pi.PropertyType });
+            foreach (var pi in pilist)
+            {
+                list.Add(new SafeFilterInfo { Fieldname = pi.Name, Fieldtype = pi.PropertyType });
             }
-            Setup(query_intro, filter, list.ToArray(), order_by, databaseType);
+            Parse(filter, list.ToArray(), order_by, databaseType);
         }
 
-        public void Setup(string query_intro, string filter, SafeFilterInfo[] safe_fields_list, List<SortInfo> order_by, DatabaseType databaseType)
+        public void Parse(string filter, SafeFilterInfo[] safe_fields_list, List<SortInfo> order_by, DatabaseType databaseType)
         {
             if (string.IsNullOrEmpty(filter))
             {
-                Query = query_intro;
                 return;
             }
 
-            _sql.Append(query_intro);
+            _sql = new StringBuilder();
 
             // First parse the incoming filter into tokens
             SqlParams = new DynamicParameters();
@@ -375,17 +383,20 @@ namespace [:Namespace:].Base
             _tokens = GenerateTokens(filter);
 
             // While we have tokens
-            while (_tokens.Count > 0) {
+            while (_tokens.Count > 0)
+            {
 
                 // Consume one token - this is the field
                 string fieldname = NextToken();
 
                 // Allow the user to put as many connectors in as they like.  Connectors can't cause the query to be sql-injection-vulnerable.
-                while (fieldname == ")" || fieldname == "(" || String.Equals(fieldname, "AND", StringComparison.CurrentCultureIgnoreCase) || String.Equals(fieldname, "OR", StringComparison.CurrentCultureIgnoreCase)) {
+                while (fieldname == ")" || fieldname == "(" || String.Equals(fieldname, "AND", StringComparison.CurrentCultureIgnoreCase) || String.Equals(fieldname, "OR", StringComparison.CurrentCultureIgnoreCase))
+                {
                     _sql.Append(" ");
                     _sql.Append(fieldname);
                     _sql.Append(" ");
-                    if (_tokens.Count == 0) {
+                    if (_tokens.Count == 0)
+                    {
                         fieldname = null;
                         break;
                     }
@@ -397,17 +408,33 @@ namespace [:Namespace:].Base
 
                 // Is this field in the approved list?
                 Type fieldtype = null;
-                foreach (var pi in safe_fields_list) {
-                    if (pi.Fieldname== fieldname) {
-                        fieldtype = pi.Fieldtype;
-                        break;
+                foreach (var pi in safe_fields_list)
+                {
+                    if(databaseType == DatabaseType.Postgres)
+                    {
+                        // case insensitive compare for postgres
+                        if (string.Equals(pi.Fieldname, fieldname, StringComparison.OrdinalIgnoreCase))
+                        {
+                            fieldtype = pi.Fieldtype;
+                            fieldname = pi.Fieldname; // use db version so it'll work when quoted below
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        if (pi.Fieldname == fieldname)
+                        {
+                            fieldtype = pi.Fieldtype;
+                            break;
+                        }
                     }
                 }
-                if (fieldtype == null) {
+                if (fieldtype == null)
+                {
                     throw new Exception(String.Format("The field name {0} is not recognized.", fieldname));
                 }
-                
-                switch(databaseType)
+
+                switch (databaseType)
                 {
                     case DatabaseType.SqlServer:
                         _sql.Append(string.Format("[" + fieldname + "]"));
@@ -415,84 +442,106 @@ namespace [:Namespace:].Base
                     case DatabaseType.Mysql:
                         _sql.Append(string.Format("`" + fieldname + "`"));
                         break;
+                    case DatabaseType.Postgres:
+                        _sql.Append(string.Format("\"" + fieldname + "\""));
+                        break;
                     default:
                         throw new ArgumentOutOfRangeException("databaseType", databaseType, null);
                 }
-                
+
                 _sql.Append(" ");
 
                 // Next is the operation
                 // ToUpper to remove case-sensitivity
                 string op = NextToken().ToUpper();
-                if (!SAFE_OPERATIONS.Contains(op)) {
+                if (!SAFE_OPERATIONS.Contains(op))
+                {
                     throw new Exception(String.Format("The operation {0} is not recognized.", op));
                 }
                 _sql.Append(op);
                 _sql.Append(" ");
 
                 // Depending on the field type & op, let's add some parameters
-                if (op == "BETWEEN") {
+                if (op == "BETWEEN")
+                {
                     AddParameter(fieldtype);
                     _sql.Append(" AND ");
                     AddParameter(fieldtype);
 
-                // In a list of values
-                } else if (op == "IN") {
+                    // In a list of values
+                }
+                else if (op == "IN")
+                {
                     Expect("(");
                     _sql.Append("(");
-                    while (true) {
+                    while (true)
+                    {
                         AddParameter(fieldtype);
                         string comma_or_paren = NextToken();
                         if (comma_or_paren == ")") break;
-                        if (comma_or_paren != ",") {
+                        if (comma_or_paren != ",")
+                        {
                             throw new Exception(String.Format("Expected ','.  Found '{0}'.", comma_or_paren));
                         }
                         _sql.Append(", ");
                     }
                     _sql.Append(")");
 
-                // Support for "IS NULL"
-                } else if (op == "IS") {
+                    // Support for "IS NULL"
+                }
+                else if (op == "IS")
+                {
                     Expect("NULL");
                     _sql.Append(" NULL ");
 
-                // Single value
-                } else {
+                    // Single value
+                }
+                else
+                {
                     AddParameter(fieldtype);
                 }
             }
 
             // Did they specify a sort?
-            if (order_by != null && order_by.Count > 0) {
-                _sql.Append(" ORDER BY ");
-                foreach (var o in order_by) {
-                    foreach (var pi in safe_fields_list) {
-                        if (String.Equals(pi.Fieldname, o.Fieldname, StringComparison.CurrentCultureIgnoreCase)) {
-                            _sql.Append(pi.Fieldname);
-                            if (o.Direction == SortDirection.Ascending) {
-                                _sql.Append(" ASC, ");
-                            } else {
-                                _sql.Append(" DESC, ");
+            if (order_by != null && order_by.Count > 0)
+            {
+                StringBuilder orderByBuilder = new StringBuilder();
+                orderByBuilder.Append(" ORDER BY ");
+                foreach (var o in order_by)
+                {
+                    foreach (var pi in safe_fields_list)
+                    {
+                        if (String.Equals(pi.Fieldname, o.Fieldname, StringComparison.CurrentCultureIgnoreCase))
+                        {
+                            orderByBuilder.Append(pi.Fieldname);
+                            if (o.Direction == SortDirection.Ascending)
+                            {
+                                orderByBuilder.Append(" ASC, ");
+                            }
+                            else
+                            {
+                                orderByBuilder.Append(" DESC, ");
                             }
                         }
                     }
                 }
 
                 // Remove the last comma
-                _sql.Length -= 2;
+                OrderBy = orderByBuilder.ToString(0, orderByBuilder.Length - 2);
             }
 
             // Here's your SQL
-            Query = _sql.ToString();
+            Filter = _sql.ToString();
         }
 
         private void Expect(string expected_token)
         {
             string actual = NextToken();
-            if (!String.Equals(expected_token, actual)) {
+            if (!String.Equals(expected_token, actual))
+            {
                 throw new Exception(String.Format("Expected '{0}'.  Found '{1}'.", expected_token, actual));
             }
-        }        
+        }
 
         #region Safe Tokenization Function
         public static List<string> GenerateTokens(string filter)
@@ -506,16 +555,21 @@ namespace [:Namespace:].Base
             bool in_token = false;
             bool in_quotes = false;
             List<char> token_chars_lst = new List<char> { '=', '>', '<', '(', ')', ',', '!' };
-            while (i < filter.Length) {
+            while (i < filter.Length)
+            {
                 char c = filter[i];
 
                 // Whitespace characters always end a token)
-                if (Char.IsWhiteSpace(c)) {
+                if (Char.IsWhiteSpace(c))
+                {
 
                     // ...Unless they're in quotes (ie as part of value)
-                    if (in_quotes) {
+                    if (in_quotes)
+                    {
                         sb.Append(c);
-                    } else if (in_token) {
+                    }
+                    else if (in_token)
+                    {
                         tokens.Add(sb.ToString());
                         sb.Length = 0;
                         in_token = false;
@@ -524,10 +578,12 @@ namespace [:Namespace:].Base
                 }
 
                 // If this is one of the special chars (>, =, etc) end token and count char as its own token
-                if (CharIsListed(c, token_chars_lst)) {
+                if (CharIsListed(c, token_chars_lst))
+                {
 
                     // Signify end of the token preceding it
-                    if (in_token) {
+                    if (in_token)
+                    {
                         tokens.Add(sb.ToString());
                         in_token = false;
                     }
@@ -550,8 +606,10 @@ namespace [:Namespace:].Base
                             i++;
                         }
                     }
-                    if (c == '>' || c == '<') {
-                        if (filter[i + 1] == '=') {
+                    if (c == '>' || c == '<')
+                    {
+                        if (filter[i + 1] == '=')
+                        {
                             s += filter[i + 1];
                             i++;
                         }
@@ -562,17 +620,23 @@ namespace [:Namespace:].Base
                 }
 
                 // Apostrophes trigger string mode
-                if (c == '\'') {
-                    while (i < filter.Length) {
+                if (c == '\'')
+                {
+                    while (i < filter.Length)
+                    {
                         i++;
                         c = filter[i];
-                        if (c == '\'') {
+                        if (c == '\'')
+                        {
 
                             // If there's a double apostrophe, treat it as a single one
-                            if ((i + 1 <= filter.Length - 1) && (filter[i + 1] == '\'')) {
+                            if ((i + 1 <= filter.Length - 1) && (filter[i + 1] == '\''))
+                            {
                                 sb.Append('\'');
                                 i++;
-                            } else {
+                            }
+                            else
+                            {
                                 tokens.Add(sb.ToString());
                                 sb.Length = 0;
                                 in_string = false;
@@ -580,19 +644,25 @@ namespace [:Namespace:].Base
                                 break;
                             }
 
-                        } else {
+                        }
+                        else
+                        {
                             sb.Append(c);
                         }
                     }
 
                     // If the string failed to end properly, throw an error
-                    if (in_string) {
+                    if (in_string)
+                    {
                         throw new Exception("Non-terminated string in filter.");
                     }
 
                     // Normal characters just get added to the token
-                } else {
-                    if (Char.IsWhiteSpace(c) == false && !CharIsListed(c, token_chars_lst)) {
+                }
+                else
+                {
+                    if (Char.IsWhiteSpace(c) == false && !CharIsListed(c, token_chars_lst))
+                    {
                         sb.Append(c);
                         in_token = true;
                     }
@@ -603,7 +673,8 @@ namespace [:Namespace:].Base
             }
 
             // Allow strings to end normally
-            if (in_token) {
+            if (in_token)
+            {
                 tokens.Add(sb.ToString());
             }
 
@@ -615,9 +686,12 @@ namespace [:Namespace:].Base
         private static bool CharIsListed(char c, List<char> token_chars)
         {
             // -1 means variable is not in list
-            if (token_chars.IndexOf(c) != -1) {
+            if (token_chars.IndexOf(c) != -1)
+            {
                 return true;
-            } else {
+            }
+            else
+            {
                 return false;
             }
         }
@@ -637,12 +711,19 @@ namespace [:Namespace:].Base
 
             // Attempt to cast this item to the specified type
             object pvalue;
-            if (fieldtype.IsGenericType && fieldtype.GetGenericTypeDefinition() == typeof(Nullable<>)) {
+            if (fieldtype.IsGenericType && fieldtype.GetGenericTypeDefinition() == typeof(Nullable<>))
+            {
                 if (String.IsNullOrEmpty(token))
                     pvalue = null;
                 else
                     pvalue = Convert.ChangeType(token, fieldtype.GetGenericArguments()[0]);
-            } else {
+            }
+            else if(fieldtype == typeof(Guid))
+            {
+                pvalue = Guid.Parse(token);
+            }
+            else
+            {
                 pvalue = Convert.ChangeType(token, fieldtype);
             }
 
@@ -663,11 +744,13 @@ namespace [:Namespace:].Base
         public enum DatabaseType
         {
             SqlServer = 0,
-            Mysql = 1
+            Mysql = 1,
+            Postgres = 2
         }
     }
     #endregion
 }
+
 ]]>
     </BaseContent>
 </PatternFile>

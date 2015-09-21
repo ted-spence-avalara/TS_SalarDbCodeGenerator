@@ -104,6 +104,7 @@
     <PatternFile Action="Generate">IDap.patml</PatternFile>
     <PatternFile Action="Generate">IDapWithInt32PrimaryKey.patml</PatternFile>
     <PatternFile Action="Generate">IDapWithInt64PrimaryKey.patml</PatternFile>
+    <PatternFile Action="Generate">IDbConnectionFactory.patml</PatternFile>
     <PatternFile Action="Generate">ISafeQueryExecutor.patml</PatternFile>
     <PatternFile Action="Generate">SafeFetch.patml</PatternFile>
     <PatternFile Action="Generate">SafeFetchResults.patml</PatternFile>

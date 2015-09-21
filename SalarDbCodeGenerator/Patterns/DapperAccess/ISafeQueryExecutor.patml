@@ -14,9 +14,13 @@
 {
     public interface ISafeQueryExecutor
     {
-        SafeFetchResults<T> SafeQuery<T>(BaseDap dap, string filter, string fieldsToLoad, string orderbyAndDirectionString, int startIndex, int maxResults, int? queryTimeout, string tableName);
+        SafeFetchResults<T> SafeQuery<T>(string filter, string fieldsToLoad, string orderbyAndDirectionString, int startIndex, int maxResults, int? queryTimeout, string tableName);
 
-        long SafeDelete<T>(BaseDap dap, string filter, string tableName);
+        SafeFetchResults<T> SafeQuery<T>(ISafeFetchQueryBuilder builder, IDatabaseColumnTranslator databaseColumnTranslator, string filter, string fieldsToLoad, string orderbyAndDirectionString, int startIndex, int maxResults, int? queryTimeout, string tableName);
+
+        MultiSafeFetchResults<T1, T2, T3> SafeQuery<T1, T2, T3>(ISafeFetchQueryBuilder builder, IDatabaseColumnTranslator databaseColumnTranslator, string tableName, string filter, string fieldsToLoad, string orderbyAndDirectionString, int? queryTimeout);
+
+        long SafeDelete<T>(string filter, string tableName);
 
         long Insert<T>(IDapWithInt64PrimaryKey<T> baseDap, T entity);
 
