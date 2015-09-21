@@ -87,6 +87,13 @@ namespace SalarDbCodeGenerator.Schema.DbSchemaReaders
 
 		#endregion
 
+        #region Insert with ID customization
+        public override string GetInsertWithSuffix()
+        {
+            return "; SELECT LASTVAL();";
+        }
+        #endregion
+
 		#region protected methods
 		#endregion
 
