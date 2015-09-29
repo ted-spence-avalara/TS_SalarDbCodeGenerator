@@ -151,6 +151,18 @@
     <Compile Include="GeneratorEngine\Generator.cs" />
     <Compile Include="GeneratorEngine\ReplaceConsts.cs" />
     <Compile Include="GeneratorEngine\SchemaAnalyzer.cs" />
+    <None Include="Patterns\DapperAccess\Dap.patml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Patterns\DapperAccess\DefaultDatabaseColumnTranslator.patml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Patterns\DapperAccess\DefaultSafeFetchQueryBuilder.patml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Patterns\DapperAccess\IDatabaseColumnTranslator.patml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Patterns\DapperAccess\IDbConnectionFactory.patml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -338,7 +350,13 @@
     <None Include="Patterns\DapperAccess\IDapWithInt64PrimaryKey.patml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Patterns\DapperAccess\ISafeFetchQueryBuilder.patml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Patterns\DapperAccess\ISafeQueryExecutor.patml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Patterns\DapperAccess\MultiSafeFetchResults.patml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Patterns\DapperAccess\SafeFetch.patml">
