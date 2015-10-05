@@ -19,6 +19,8 @@ namespace [:Namespace:].Base
         Int64 InsertWithId(T model);
 
         T GetByPrimaryKey(Int64 id);
+
+        void Delete(Int64 id);
     }
 }
 ]]>
