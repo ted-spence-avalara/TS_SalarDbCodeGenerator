@@ -102,17 +102,9 @@
 	<PatternFile Action="Generate">DapperSqlMapper.patml</PatternFile>
 	<PatternFile Action="Generate">DapperEntityPrincipal.patml</PatternFile>
 	<PatternFile Action="Generate">DapperEntityUser.patml</PatternFile>
-    <PatternFile Action="Generate">DefaultDatabaseColumnTranslator.patml</PatternFile>
-    <PatternFile Action="Generate">DefaultSafeFetchQueryBuilder.patml</PatternFile>
     <PatternFile Action="Generate">IDap.patml</PatternFile>
     <PatternFile Action="Generate">IDapWithInt32PrimaryKey.patml</PatternFile>
     <PatternFile Action="Generate">IDapWithInt64PrimaryKey.patml</PatternFile>
-    <PatternFile Action="Generate">IDatabaseColumnTranslator.patml</PatternFile>
     <PatternFile Action="Generate">IDbConnectionFactory.patml</PatternFile>
-    <PatternFile Action="Generate">ISafeFetchQueryBuilder.patml</PatternFile>
-    <PatternFile Action="Generate">ISafeQueryExecutor.patml</PatternFile>
-    <PatternFile Action="Generate">MultiSafeFetchResults.patml</PatternFile>
-    <PatternFile Action="Generate">SafeFetch.patml</PatternFile>
-    <PatternFile Action="Generate">SafeFetchResults.patml</PatternFile>
 	<PatternFile Action="Generate">VS2010ClassProject.patml</PatternFile>
 </PatternProject>
