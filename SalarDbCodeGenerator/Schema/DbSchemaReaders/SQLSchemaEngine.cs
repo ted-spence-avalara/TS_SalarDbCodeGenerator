@@ -692,6 +692,30 @@ namespace SalarDbCodeGenerator.Schema.DbSchemaReaders
 								DbColumn keyColumn = table.FindColumnDb(constraintKey.KeyColumnName);
 								constraintKey.KeyColumn = keyColumn;
 							}
+
+                            // If we don't currently have a primary key on this table, let's see if we find one in these constraints
+                            if (!table.HasPrimaryKey()) {
+                                System.Diagnostics.Debug.WriteLine("Table " + table.TableName + " does not have a primary key - checking indexes");
+                                keysData.DefaultView.RowFilter = " TableName='" + table.TableName + "' AND IsPrimaryKey=1 ";
+                                DataRowView myrow = null;
+                                foreach (DataRowView keysDataRow in keysData.DefaultView)
+                                {
+                                    System.Diagnostics.Debug.WriteLine("Table " + table.TableName + " should have a PK, it's named " + keysDataRow["ColumnName"].ToString());
+                                    myrow = keysDataRow;
+                                    break;
+                                }
+                                if (myrow != null) { 
+                                    foreach (var column in table.SchemaColumns)
+                                    {
+                                        if (String.Equals(column.FieldNameDb, myrow["ColumnName"].ToString(), StringComparison.CurrentCultureIgnoreCase))
+                                        {
+                                            System.Diagnostics.Debug.WriteLine("Matched row " + column.FieldNameDb + " and was able to assign a primary key.");
+                                            column.PrimaryKey = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
 						}
 					}
 				}

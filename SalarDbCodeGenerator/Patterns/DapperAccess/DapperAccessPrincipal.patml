@@ -45,12 +45,12 @@ namespace [:Namespace:].Entities
         
         public override string GetSqlTableName()
         {
-            return SqlTableName;
+            return "[:TableOwnerNameAsPrefix:][:TableNameDb:]";
         }
 
 		public List<[:TableName:]> GetTop(int count)
 		{
-			var queryResult = Query<[:TableName:]>(string.Format("[#GetTopSelectStatement#]", count, SqlTableName));
+			var queryResult = Query<[:TableName:]>(string.Format("[#GetTopSelectStatement#]", count));
 			return queryResult as List<[:TableName:]> ?? queryResult.ToList();
 		}
         
@@ -63,7 +63,7 @@ namespace [:Namespace:].Entities
             if (_obj_cache == null || _next_cache_date < DateTime.UtcNow || force_cache_reload) {
                 lock (_cache_lock) {
                     if (_obj_cache == null || _next_cache_date < DateTime.UtcNow || force_cache_reload) {
-                        _obj_cache = Query<[:TableName:]>(string.Format("SELECT * FROM {0}", SqlTableName)).ToArray();
+                        _obj_cache = Query<[:TableName:]>("SELECT * FROM [:TableOwnerNameAsPrefix:][:TableNameDb:]").ToArray();
                         OnCache(_obj_cache);
                         _next_cache_date = DateTime.UtcNow.AddSeconds(CACHE_SECONDS);
                     }
@@ -146,7 +146,7 @@ namespace [:Namespace:].Entities
 		{
 			using (var dap = new [:ForeignTableName:]Dap(this))
 			{
-				return dap.GetBy[:ForeignFieldName:]([:ForeignFieldName:]);
+				return dap.GetByPrimaryKey([:ForeignFieldName:]);
 			}
 		}]]>
 				</Condition>
@@ -388,24 +388,21 @@ namespace [:Namespace:].Entities
 			<PatternContent Name="SqlCommands" ConditionKeyMode="TablePrimaryKey">
 				<Condition Key="ReadOnlyTable">
 					<![CDATA[
-		public const string SqlTableName = "[:TableOwnerNameAsPrefix:][:TableNameDb:]";
-		public const string SqlSelectCommand = "SELECT * FROM " + SqlTableName;]]>
+		public const string SqlSelectCommand = "SELECT * FROM [:TableOwnerNameAsPrefix:][:TableNameDb:]";]]>
 				</Condition>
 				<Condition Key="NoPrimaryKey">
 					<![CDATA[
-		public const string SqlTableName = "[:TableOwnerNameAsPrefix:][:TableNameDb:]";
-		public const string SqlSelectCommand = "SELECT * FROM " + SqlTableName;
-		public const string SqlInsertCommand = "INSERT INTO " + SqlTableName + " [#InsertParametersValue#] ";
+		public const string SqlSelectCommand = "SELECT * FROM [:TableOwnerNameAsPrefix:][:TableNameDb:]";
+		public const string SqlInsertCommand = "INSERT INTO [:TableOwnerNameAsPrefix:][:TableNameDb:] [#InsertParametersValue#] ";
 		]]>
 				</Condition>
 				<Condition Key="WithPrimaryKey">
 					<![CDATA[
-		public const string SqlTableName = "[:TableOwnerNameAsPrefix:][:TableNameDb:]";
-		public const string SqlSelectCommand = "SELECT * FROM " + SqlTableName;
-		public const string SqlInsertCommand = "INSERT INTO " + SqlTableName + " ([#InsertParametersName#]) VALUES ([#InsertParametersValue#]) ";
-		public const string SqlUpdateCommand = "UPDATE " + SqlTableName + " SET [#UpdateParameters#] WHERE [#PrimaryKeyParameters#]";
-		public const string SqlDeleteCommand = "DELETE FROM " + SqlTableName + " WHERE [#PrimaryKeyParameters#]";
-		public const string SqlInsertWithIdCommand = "INSERT INTO " + SqlTableName + " ([#InsertParametersName#]) [:InsertWithIdValuesStatement:] ([#InsertParametersValue#]) [:InsertWithIdSuffix:]";
+		public const string SqlSelectCommand = "SELECT * FROM [:TableOwnerNameAsPrefix:][:TableNameDb:]";
+		public const string SqlInsertCommand = "INSERT INTO [:TableOwnerNameAsPrefix:][:TableNameDb:] ([#InsertParametersName#]) VALUES ([#InsertParametersValue#]) ";
+		public const string SqlUpdateCommand = "UPDATE [:TableOwnerNameAsPrefix:][:TableNameDb:] SET [#UpdateParameters#] WHERE [#PrimaryKeyParameters#]";
+		public const string SqlDeleteCommand = "DELETE FROM [:TableOwnerNameAsPrefix:][:TableNameDb:] WHERE [#PrimaryKeyParameters#]";
+		public const string SqlInsertWithIdCommand = "INSERT INTO [:TableOwnerNameAsPrefix:][:TableNameDb:] ([#InsertParametersName#]) [:InsertWithIdValuesStatement:] ([#InsertParametersValue#]) [:InsertWithIdSuffix:]";
 		]]>
 				</Condition>
 				<ConditionContents>
