@@ -101,12 +101,16 @@ namespace SalarDbCodeGenerator.Schema.Database
 		/// </summary>
 		public bool HasPrimaryKey()
 		{
+            int num_primary_keys = 0;
 			foreach (var column in SchemaColumns)
 			{
-				if (column.PrimaryKey)
-					return true;
+                if (column.PrimaryKey)
+                {
+                    num_primary_keys++;
+                }
 			}
-			return false;
+
+            return (num_primary_keys == 1);
 		}
 
 		private bool? _hasOneToOneRelation = null;
