@@ -319,6 +319,13 @@ namespace SalarDbCodeGenerator.Schema.DbSchemaReaders
 						};
 						column.FieldNameSchema = DbSchemaNames.FieldName_RemoveInvalidChars(column.FieldNameSchema);
 
+                        // Primary keys that aren't a valid source of dapper access patterns aren't valid
+                        if (column.PrimaryKey) {
+                            if (column.DataTypeDotNet == "System.DateTime") {
+                                column.PrimaryKey = false;
+                            }
+                        }
+
 						// Columns which needs additional fetch
 						var succeed = FillColumnAdditionalInfo(column, columnsDbTypeTable, tableName, columnName);
 
@@ -701,13 +708,21 @@ namespace SalarDbCodeGenerator.Schema.DbSchemaReaders
                                 foreach (DataRowView keysDataRow in keysData.DefaultView)
                                 {
                                     System.Diagnostics.Debug.WriteLine("Table " + table.TableName + " should have a PK, it's named " + keysDataRow["ColumnName"].ToString());
+                                    if (myrow != null)
+                                    {
+                                        System.Diagnostics.Debug.WriteLine("Tables with a dual primary key are not supported.");
+                                        myrow = null;
+                                        break;
+                                    }
                                     myrow = keysDataRow;
-                                    break;
                                 }
+
+                                // If we found one single primary key through this means, use it
                                 if (myrow != null) { 
                                     foreach (var column in table.SchemaColumns)
                                     {
-                                        if (String.Equals(column.FieldNameDb, myrow["ColumnName"].ToString(), StringComparison.CurrentCultureIgnoreCase))
+                                        if (String.Equals(column.FieldNameDb, myrow["ColumnName"].ToString(), StringComparison.CurrentCultureIgnoreCase)
+                                            && column.DataTypeDotNet != "System.DateTime")
                                         {
                                             System.Diagnostics.Debug.WriteLine("Matched row " + column.FieldNameDb + " and was able to assign a primary key.");
                                             column.PrimaryKey = true;
