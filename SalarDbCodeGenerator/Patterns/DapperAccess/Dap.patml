@@ -30,7 +30,7 @@ namespace [:Namespace:].Base
         public IDbConnection Connection
         {
             get { return _connection; }
-            protected set { _connection = value; }
+            private set { _connection = value; }
         }
 
         public IDbTransaction Transaction
@@ -217,13 +217,13 @@ namespace [:Namespace:].Base
             return SqlMapper.QueryMultiple(_connection, sql, param, transaction, commandTimeout, commandType);
         }
 
-        protected void OpenConnection()
+        private void OpenConnection()
         {
             if (_connection != null && _connection.State != ConnectionState.Open)
                 _connection.Open();
         }
 
-        protected void CloseConnection()
+        private void CloseConnection()
         {
             if (_connection != null)
                 _connection.Close();
