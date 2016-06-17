@@ -23,13 +23,78 @@ namespace [:Namespace:].Base
         void Insert(T model);
         void Insert(IEnumerable<T> model);
 
-        List<T> GetAll(bool forceCacheReload);
+        List<T> GetAll();
     }
 
     public interface IDap : IDisposable
     {
         string GetSqlTableName();
         string GetPrimaryKeyFieldName();
+    }
+	
+    /// <summary>
+    /// Prototype for a class that has a primary key with type "Byte"
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public interface IDapWithBytePrimaryKey<T> : IDap<T>
+    {
+        Byte InsertWithId(T model);
+
+        T GetByPrimaryKey(Byte id);
+
+        void Delete(Byte id);
+    }
+
+	/// <summary>
+    /// Prototype for a class that has a primary key with type "Int16"
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+	public interface IDapWithInt16PrimaryKey<T> : IDap<T>
+    {
+        Int16 InsertWithId(T model);
+
+        T GetByPrimaryKey(Int16 id);
+
+        void Delete(Int16 id);
+    }
+
+	/// <summary>
+    /// Prototype for a class that has a primary key with type "Int32"
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+	public interface IDapWithInt32PrimaryKey<T> : IDap<T>
+    {
+        Int32 InsertWithId(T model);
+
+        T GetByPrimaryKey(Int32 id);
+
+        void Delete(Int32 id);
+    }
+	
+	/// <summary>
+    /// Prototype for a class that has a primary key with type "Int64"
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+	public interface IDapWithInt64PrimaryKey<T> : IDap<T>
+    {
+        Int64 InsertWithId(T model);
+
+        T GetByPrimaryKey(Int64 id);
+
+        void Delete(Int64 id);
+    }
+	
+	/// <summary>
+    /// Prototype for a class that has a primary key with type "String"
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+	public interface IDapWithStringPrimaryKey<T> : IDap<T>
+    {
+        String InsertWithId(T model);
+
+        T GetByPrimaryKey(String id);
+
+        void Delete(String id);
     }
 }
 ]]>
