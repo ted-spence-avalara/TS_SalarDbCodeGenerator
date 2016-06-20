@@ -762,16 +762,22 @@ namespace SalarDbCodeGenerator.GeneratorEngine
 							appliedContent = PatternContentAppliesTo_OneTable(appliedContent, pattern.ConditionContents, table, null, null);
 						}
 
-						// replace in the main content
-						baseContent = Common.ReplaceEx(baseContent, replacementName, appliedContent, StringComparison.CurrentCulture);
-						break;
+                        // replace in the main content
+                        baseContent = Common.ReplaceEx(baseContent, replacementName, appliedContent, StringComparison.CurrentCulture);
+                        break;
 
 					default:
 						break;
 				}
 			}
 
-			return baseContent;
+            // Standard replacements available everywhere
+            baseContent = Common.ReplaceExIgnoreCase(baseContent, ReplaceConsts.TableName, table.TableNameSchema);
+            baseContent = Common.ReplaceExIgnoreCase(baseContent, ReplaceConsts.TableNameDb, table.GetEscapedTableName());
+            baseContent = Common.ReplaceExIgnoreCase(baseContent, ReplaceConsts.TableOwnerName, table.OwnerName);
+            baseContent = Common.ReplaceExIgnoreCase(baseContent, ReplaceConsts.TableOwnerNameAsPrefix, TableOwnerNameAsPrefix(table));
+
+            return baseContent;
 		}
 
 
@@ -1058,7 +1064,7 @@ namespace SalarDbCodeGenerator.GeneratorEngine
 			}
 
 			content = Common.ReplaceExIgnoreCase(content, ReplaceConsts.TableName, table.TableNameSchema);
-			content = Common.ReplaceExIgnoreCase(content, ReplaceConsts.TableNameDb, table.TableName);
+			content = Common.ReplaceExIgnoreCase(content, ReplaceConsts.TableNameDb, table.GetEscapedTableName());
 			content = Common.ReplaceExIgnoreCase(content, ReplaceConsts.TableOwnerName, table.OwnerName);
 			content = Common.ReplaceExIgnoreCase(content, ReplaceConsts.TableOwnerNameAsPrefix, TableOwnerNameAsPrefix(table));
 
@@ -1110,7 +1116,7 @@ namespace SalarDbCodeGenerator.GeneratorEngine
 		{
 			// table of the column
 			content = Common.ReplaceExIgnoreCase(content, ReplaceConsts.TableName, table.TableNameSchema);
-			content = Common.ReplaceExIgnoreCase(content, ReplaceConsts.TableNameDb, table.TableName);
+			content = Common.ReplaceExIgnoreCase(content, ReplaceConsts.TableNameDb, table.GetEscapedTableName());
 			content = Common.ReplaceExIgnoreCase(content, ReplaceConsts.TableOwnerName, table.OwnerName);
 			content = Common.ReplaceExIgnoreCase(content, ReplaceConsts.TableOwnerNameAsPrefix, TableOwnerNameAsPrefix(table));
 
@@ -1126,7 +1132,7 @@ namespace SalarDbCodeGenerator.GeneratorEngine
 				var refTable = column.IsReferenceKeyTable;
 
 				content = Common.ReplaceExIgnoreCase(content, ReplaceConsts.TableNameRefField, refTable.TableNameSchema);
-				content = Common.ReplaceExIgnoreCase(content, ReplaceConsts.TableNameDbRefField, refTable.TableName);
+				content = Common.ReplaceExIgnoreCase(content, ReplaceConsts.TableNameDbRefField, refTable.GetEscapedTableName());
 			}
 
 			// column information
@@ -1190,7 +1196,7 @@ namespace SalarDbCodeGenerator.GeneratorEngine
 
 			// local table
 			content = Common.ReplaceExIgnoreCase(content, ReplaceConsts.LocalTableName, table.TableNameSchema);
-			content = Common.ReplaceExIgnoreCase(content, ReplaceConsts.LocalTableNameDb, table.TableName);
+			content = Common.ReplaceExIgnoreCase(content, ReplaceConsts.LocalTableNameDb, table.GetEscapedTableName());
 
 			// the result
 			string result = "";
@@ -1237,12 +1243,12 @@ namespace SalarDbCodeGenerator.GeneratorEngine
 
 			// local table
 			content = Common.ReplaceExIgnoreCase(content, ReplaceConsts.LocalTableName, table.TableNameSchema);
-			content = Common.ReplaceExIgnoreCase(content, ReplaceConsts.LocalTableNameDb, table.TableName);
+			content = Common.ReplaceExIgnoreCase(content, ReplaceConsts.LocalTableNameDb, table.GetEscapedTableName());
 
 			// foreign table
 			content = Common.ReplaceExIgnoreCase(content, ReplaceConsts.ForeignTableNameAsField, foreignKey.ForeignTableNameInLocalTable);
 			content = Common.ReplaceExIgnoreCase(content, ReplaceConsts.ForeignTableName, foreignKey.ForeignTable.TableNameSchema);
-			content = Common.ReplaceExIgnoreCase(content, ReplaceConsts.ForeignTableNameDb, foreignKey.ForeignTable.TableName);
+			content = Common.ReplaceExIgnoreCase(content, ReplaceConsts.ForeignTableNameDb, foreignKey.ForeignTable.GetEscapedTableName());
 
 			// ===================================
 			// local field
@@ -1280,7 +1286,7 @@ namespace SalarDbCodeGenerator.GeneratorEngine
 				return "";
 			}
 
-			content = Replacer_PatternBaseContent(content, table.TableNameSchema, table.TableName);
+			content = Replacer_PatternBaseContent(content, table.TableNameSchema, table.GetEscapedTableName());
 
 			// the result
 			string result = "";

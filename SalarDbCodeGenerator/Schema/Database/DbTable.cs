@@ -42,6 +42,8 @@ namespace SalarDbCodeGenerator.Schema.Database
 			}
 		}
 
+        public string EscapedTableName { get; set; }
+
 		private string _tableNameCs;
 
 		/// <summary>
@@ -268,10 +270,19 @@ namespace SalarDbCodeGenerator.Schema.Database
 		{
 			return this.TableType.ToString() + " " + this.TableName;
 		}
-		#endregion
 
-		#region private methods
-		#endregion
+        /// <summary>
+        /// Returns the escaped table name if available, and the regular table name otherwise
+        /// </summary>
+        /// <returns></returns>
+        public string GetEscapedTableName()
+        {
+            return EscapedTableName ?? TableName;
+        }
+        #endregion
 
-	}
+        #region private methods
+        #endregion
+
+    }
 }

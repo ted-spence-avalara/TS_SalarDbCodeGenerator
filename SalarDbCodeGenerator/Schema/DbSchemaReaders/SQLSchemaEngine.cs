@@ -198,6 +198,7 @@ namespace SalarDbCodeGenerator.Schema.DbSchemaReaders
 
 					// new table
 					var dbTable = new DbTable(tableName, columns);
+                    dbTable.EscapedTableName = "[" + tableName + "]";
 
 					// table schema
 					dbTable.OwnerName = ownerName;
