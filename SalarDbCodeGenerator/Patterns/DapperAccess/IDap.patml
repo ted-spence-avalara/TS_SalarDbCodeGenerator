@@ -23,7 +23,8 @@ namespace [:Namespace:].Base
         void Insert(T model);
         void Insert(IEnumerable<T> model);
 
-        List<T> GetAll();
+        IEnumerable<T> GetAll();
+        IEnumerable<T> GetTop(int count);
     }
 
     public interface IDap : IDisposable

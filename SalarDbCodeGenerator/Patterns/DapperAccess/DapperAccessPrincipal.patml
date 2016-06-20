@@ -46,15 +46,19 @@ namespace [:Namespace:].Entities
             return "[:TableOwnerNameAsPrefix:][:TableNameDb:]";
         }
 
-        public List<[:TableName:]> GetTop(int count)
+        public IEnumerable<[:TableName:]> GetTop(int count)
         {
-            return Query<[:TableName:]>(string.Format("SELECT TOP {0} * FROM [:TableOwnerNameAsPrefix:][:TableNameDb:] WITH (nolock)", count)).ToList();
+            return Query<[:TableName:]>(SqlGetTopCommand, new { top = count });
         }
         
-        public List<[:TableName:]> GetAll()
+        public IEnumerable<[:TableName:]> GetAll()
         {
-            return Query<[:TableName:]>("SELECT * FROM [:TableOwnerNameAsPrefix:][:TableNameDb:] WITH (nolock)").ToList();
+            return Query<[:TableName:]>(SqlGetAllCommand);
         }
+        
+        public const string SqlGetTopCommand = "SELECT TOP (@top) * FROM [:TableOwnerNameAsPrefix:][:TableNameDb:] WITH (nolock)";
+        public const string SqlGetAllCommand = "SELECT * FROM [:TableOwnerNameAsPrefix:][:TableNameDb:] WITH (nolock)";
+        
 [#UpdatableTable#]
 [#ForeignKeys#]
 [#IndexConstraintKeys#]
@@ -68,10 +72,12 @@ namespace [:Namespace:].Entities
                 <Condition Key="MultiplicityOne">
                     <![CDATA[
         // Foreign key multiplicity-one pattern
-        public List<[:LocalTableName:]> GetBy[:LocalFieldName:]([:LocalFieldDotNetType:] [:LocalFieldName:])
+        public IEnumerable<[:LocalTableName:]> GetBy[:LocalFieldName:]([:LocalFieldDotNetType:] [:LocalFieldName:])
         {
-            return Query<[:LocalTableName:]>("SELECT * FROM [:TableOwnerNameAsPrefix:][:TableNameDb:] WITH (nolock) WHERE [:LocalFieldNameDb:]=[:ProviderSPParamPrefix:][:LocalFieldName:]", new { [:LocalFieldName:] = [:LocalFieldName:] }).ToList();
+            return Query<[:LocalTableName:]>(SqlGetBy[:LocalFieldName:]Command, new { [:LocalFieldName:] = [:LocalFieldName:] });
         }
+        
+        public const string SqlGetBy[:LocalFieldName:]Command = "SELECT * FROM [:TableOwnerNameAsPrefix:][:TableNameDb:] WITH (nolock) WHERE [:LocalFieldNameDb:]=[:ProviderSPParamPrefix:][:LocalFieldName:]";
         ]]>
                 </Condition>
                 <Condition Key="MultiplicityMany">
@@ -86,10 +92,13 @@ namespace [:Namespace:].Entities
                 <Condition Key="NormalKey">
                     <![CDATA[
         // Index key normal pattern
-        public List<[:TableName:]> GetBy[:IndexKeyName:]([:IndexKeyDotNetType:] [:IndexKeyName:])
+        public IEnumerable<[:TableName:]> GetBy[:IndexKeyName:]([:IndexKeyDotNetType:] [:IndexKeyName:])
         {
-            return Query<[:TableName:]>("SELECT * FROM [:TableOwnerNameAsPrefix:][:TableNameDb:] WITH (nolock) WHERE [:IndexKeyNameDb:]=[:ProviderSPParamPrefix:][:IndexKeyName:]", new { [:IndexKeyName:] = [:IndexKeyName:] }).ToList();
-        }]]>
+            return Query<[:TableName:]>(SqlGetBy[:IndexKeyName:]Command, new { [:IndexKeyName:] = [:IndexKeyName:] });
+        }
+                
+        public const string SqlGetBy[:IndexKeyName:]Command = "SELECT * FROM [:TableOwnerNameAsPrefix:][:TableNameDb:] WITH (nolock) WHERE [:IndexKeyNameDb:]=[:ProviderSPParamPrefix:][:IndexKeyName:]";
+        ]]>
                 </Condition>
             </PatternContent>
 
@@ -99,8 +108,10 @@ namespace [:Namespace:].Entities
         // Unique constraint key pattern
         public [:TableName:] GetBy[:IndexKeyName:]Index([:IndexKeyDotNetType:] [:IndexKeyName:])
         {
-            return Query<[:TableName:]>("SELECT * FROM [:TableOwnerNameAsPrefix:][:TableNameDb:] WITH (nolock) WHERE [:IndexKeyNameDb:]=[:ProviderSPParamPrefix:][:IndexKeyName:]", new { [:IndexKeyName:] = [:IndexKeyName:] }).FirstOrDefault();
+            return Query<[:TableName:]>(SqlGetBy[:IndexKeyName:]Command, new { [:IndexKeyName:] = [:IndexKeyName:] }).FirstOrDefault();
         }
+        
+        public const string SqlGetBy[:IndexKeyName:]Command = "SELECT * FROM [:TableOwnerNameAsPrefix:][:TableNameDb:] WITH (nolock) WHERE [:IndexKeyNameDb:]=[:ProviderSPParamPrefix:][:IndexKeyName:]";
 
         public void DeleteBy[:IndexKeyName:]([:IndexKeyDotNetType:] [:IndexKeyName:])
         {
@@ -222,8 +233,10 @@ namespace [:Namespace:].Entities
         
         public [:TableName:] GetBy[:FieldName:]([:FieldDotNetType:] [:FieldName:])
         {
-            return Query<[:TableName:]>("SELECT * FROM [:TableOwnerNameAsPrefix:][:TableNameDb:] WITH (nolock) WHERE [:FieldNameDbEscaped:]=[:ProviderSPParamPrefix:][:FieldName:]", new { [:FieldName:] = [:FieldName:] }).FirstOrDefault();
+            return Query<[:TableName:]>(SqlGetBy[:FieldName:]Command, new { [:FieldName:] = [:FieldName:] }).FirstOrDefault();
         }
+        
+        public const string SqlGetBy[:FieldName:]Command = "SELECT * FROM [:TableOwnerNameAsPrefix:][:TableNameDb:] WITH (nolock) WHERE [:FieldNameDbEscaped:]=[:ProviderSPParamPrefix:][:FieldName:]";
 ]]>
                         </Condition>
                         <Condition Key="OneToOneForeignKey">
@@ -236,8 +249,10 @@ namespace [:Namespace:].Entities
         
         public [:TableName:] GetBy[:FieldName:]([:FieldDotNetType:] [:FieldName:])
         {
-            return Query<[:TableName:]>("SELECT * FROM [:TableOwnerNameAsPrefix:][:TableNameDb:] WITH (nolock) WHERE [:FieldNameDbEscaped:]=[:ProviderSPParamPrefix:][:FieldName:]", new { [:FieldName:] = [:FieldName:] }).FirstOrDefault();
+            return Query<[:TableName:]>(SqlGetBy[:FieldName:]Command, new { [:FieldName:] = [:FieldName:] }).FirstOrDefault();
         }
+        
+        public const string SqlGetBy[:FieldName:]Command = "SELECT * FROM [:TableOwnerNameAsPrefix:][:TableNameDb:] WITH (nolock) WHERE [:FieldNameDbEscaped:]=[:ProviderSPParamPrefix:][:FieldName:]";
 ]]>
                         </Condition>
                         <Condition Key="AutoIncrementPrimaryKey">
@@ -250,8 +265,10 @@ namespace [:Namespace:].Entities
 
         public [:TableName:] GetBy[:FieldName:]([:FieldDotNetType:] [:FieldName:])
         {
-            return Query<[:TableName:]>("SELECT * FROM [:TableOwnerNameAsPrefix:][:TableNameDb:] WITH (nolock) WHERE [:FieldNameDbEscaped:]=[:ProviderSPParamPrefix:][:FieldName:]", new { [:FieldName:] = [:FieldName:] }).FirstOrDefault();
+            return Query<[:TableName:]>(SqlGetBy[:FieldName:]Command, new { [:FieldName:] = [:FieldName:] }).FirstOrDefault();
         }
+        
+        public const string SqlGetBy[:FieldName:]Command = "SELECT * FROM [:TableOwnerNameAsPrefix:][:TableNameDb:] WITH (nolock) WHERE [:FieldNameDbEscaped:]=[:ProviderSPParamPrefix:][:FieldName:]";
 ]]>
                         </Condition>
                         <Condition Key="AutoIncrement"></Condition>
@@ -267,8 +284,10 @@ namespace [:Namespace:].Entities
 
         public [:TableName:] GetBy[:FieldName:]([:FieldDotNetType:] [:FieldName:])
         {
-            return Query<[:TableName:]>("SELECT * FROM [:TableOwnerNameAsPrefix:][:TableNameDb:] WITH (nolock) WHERE [:FieldNameDbEscaped:]=[:ProviderSPParamPrefix:][:FieldName:]", new { [:FieldName:] = [:FieldName:] }).FirstOrDefault();
+            return Query<[:TableName:]>(SqlGetBy[:FieldName:]Command, new { [:FieldName:] = [:FieldName:] }).FirstOrDefault();
         }
+        
+        public const string SqlGetBy[:FieldName:]Command = "SELECT * FROM [:TableOwnerNameAsPrefix:][:TableNameDb:] WITH (nolock) WHERE [:FieldNameDbEscaped:]=[:ProviderSPParamPrefix:][:FieldName:]";
 ]]>
                         </Condition>
                         <Condition Key="NormalField"></Condition>
