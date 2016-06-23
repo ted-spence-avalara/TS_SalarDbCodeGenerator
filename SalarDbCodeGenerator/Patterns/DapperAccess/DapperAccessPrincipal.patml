@@ -132,19 +132,21 @@ namespace [:Namespace:].Entities
                 </Condition>
             </PatternContent>
 
-                <PatternContent Name="UpdatableTable" ConditionKeyMode="TablePrimaryKey">
+            <PatternContent Name="UpdatableTable" ConditionKeyMode="TablePrimaryKey">
                 <Condition Key="ReadOnlyTable"></Condition>
                 <Condition Key="NoPrimaryKey">
                     <![CDATA[
-        public void Insert([:TableName:] model)
+        public void Insert([:TableName:] model, int userid, IDbTransaction transaction = null)
         {
-            Execute(SqlInsertCommand, model);
+            [#SetCreatedFields#]
+            Execute(SqlInsertCommand, model, transaction);
         }
 
-        public void Insert(IEnumerable<[:TableName:]> models)
+        public void Insert(IEnumerable<[:TableName:]> models, int userid, IDbTransaction transaction = null)
         {
+            [#SetCreatedFields#]
             foreach (var obj in models) {
-                Insert(obj);
+                Insert(obj, userid, transaction);
             }
         }
         
@@ -161,15 +163,15 @@ namespace [:Namespace:].Entities
                 <Condition Key="WithPrimaryKey">
                     <![CDATA[
 [#GetPrimaryKey#]
-        public void Insert([:TableName:] model)
+        public void Insert([:TableName:] model, int userid, IDbTransaction transaction = null)
         {
-            Execute(SqlInsertCommand, model);
+            InsertWithId(model, userid, transaction);
         }
 
-        public void Insert(IEnumerable<[:TableName:]> models)
+        public void Insert(IEnumerable<[:TableName:]> models, int userid, IDbTransaction transaction = null)
         {
             foreach (var obj in models) {
-                Insert(obj);
+                InsertWithId(obj, userid, transaction);
             }
         }
 
@@ -177,34 +179,38 @@ namespace [:Namespace:].Entities
         /// Insert this record and return the [:PrimaryKeyName:] from OUTPUT inserted.
         /// </summary>
         /// <returns>[:PrimaryKeyName:] from OUTPUT inserted.</returns>
-        public [:PrimaryKeyDotNetType:] InsertWithId([:TableName:] model)
+        public [:PrimaryKeyDotNetType:] InsertWithId([:TableName:] model, int userid, IDbTransaction transaction = null)
         {
-            var result = Query<[:PrimaryKeyDotNetType:]>(SqlInsertWithIdCommand, model);
+            [#SetCreatedFields#]
+            var result = Query<[:PrimaryKeyDotNetType:]>(SqlInsertWithIdCommand, model, transaction);
             model.[:PrimaryKeyName:] = ([:PrimaryKeyDotNetType:])result.FirstOrDefault();
             return model.[:PrimaryKeyName:];
         }
         
-        public void InsertWithId(IEnumerable<[:TableName:]> models)
+        public void InsertWithId(IEnumerable<[:TableName:]> models, int userid, IDbTransaction transaction = null)
         {
             foreach (var obj in models) {
-                InsertWithId(obj);
+                InsertWithId(obj, userid, transaction);
             }
         }
         
-        public void Delete([#PrimaryKeyListAsArguments#])
+        public void Delete([#PrimaryKeyListAsArguments#], IDbTransaction transaction = null)
         {
-            Execute(SqlDeleteCommand, new { [#PrimaryKeyListAsCodeProps#] });
+            long rows_affected = Query<long>(SqlDeleteCommand, new { [#PrimaryKeyListAsCodeProps#] }, transaction).FirstOrDefault();
+            if (rows_affected != 1) throw new Exception("Delete [:TableName:]: Item not found");
         }
 
-        public void Update([:TableName:] model)
+        public void Update([:TableName:] model, int userid, IDbTransaction transaction = null)
         {
-            Execute(SqlUpdateCommand, model);
+            [#SetModifiedFields#]
+            long rows_affected = Query<long>(SqlUpdateCommand, model, transaction).FirstOrDefault();
+            if (rows_affected != 1) throw new Exception("Update [:TableName:]: Item not found");
         }
 
-        public void Update(IEnumerable<[:TableName:]> models)
+        public void Update(IEnumerable<[:TableName:]> models, int userid, IDbTransaction transaction = null)
         {
             foreach (var obj in models) {
-                Update(obj);
+                Update(obj, userid, transaction);
             }
         }
         
@@ -221,6 +227,34 @@ namespace [:Namespace:].Entities
                 </Condition>
 
                 <ConditionContents>
+                    <PatternContent Name="SetCreatedFields" ConditionKeyMode="FieldsKeyTypeAll">
+                        <Condition Key="FieldsKeyNameMatch" MatchValue="CreatedUserId">
+                            <![CDATA[
+            model.CreatedUserId = userid;]]>
+                        </Condition>
+                        <Condition Key="FieldsKeyNameMatch" MatchValue="CreatedDate">
+                            <![CDATA[
+            model.CreatedDate = DateTime.UtcNow;]]>
+                        </Condition>
+                        <Condition Key="FieldsKeyNameMatch" MatchValue="ModifiedUserId">
+                            <![CDATA[
+            model.ModifiedUserId = userid;]]>
+                        </Condition>
+                        <Condition Key="FieldsKeyNameMatch" MatchValue="ModifiedDate">
+                            <![CDATA[
+            model.ModifiedDate = DateTime.UtcNow;]]>
+                        </Condition>
+                    </PatternContent>
+                    <PatternContent Name="SetModifiedFields" ConditionKeyMode="FieldsKeyTypeAll">
+                        <Condition Key="FieldsKeyNameMatch" MatchValue="ModifiedUserId">
+                            <![CDATA[
+            model.ModifiedUserId = userid;]]>
+                        </Condition>
+                        <Condition Key="FieldsKeyNameMatch" MatchValue="ModifiedDate">
+                            <![CDATA[
+            model.ModifiedDate = DateTime.UtcNow;]]>
+                        </Condition>
+                    </PatternContent>
                     <PatternContent Name="GetPrimaryKey" ConditionKeyMode="FieldsKeyTypeAll">
                         <ItemsSeperator></ItemsSeperator>
                         <Condition Key="OneToOnePrimaryKey">
@@ -394,7 +428,7 @@ namespace [:Namespace:].Entities
                         <Condition Key="NullableType"><![CDATA[[:ProviderSPParamPrefix:][:FieldName:]]]></Condition>
                     </PatternContent>
 
-                    <PatternContent Name="UpdateParameters" ConditionKeyMode="FieldsKeyTypeAll">
+                    <PatternContent Name="UpdateParameters" ConditionKeyMode="FieldsKeyTypeNoCreated">
                         <ItemsSeperator>
                             <![CDATA[ , ]]>
                         </ItemsSeperator>
