@@ -428,11 +428,13 @@ namespace [:Namespace:].Entities
                         <Condition Key="NullableType"><![CDATA[[:ProviderSPParamPrefix:][:FieldName:]]]></Condition>
                     </PatternContent>
 
-                    <PatternContent Name="UpdateParameters" ConditionKeyMode="FieldsKeyTypeNoCreated">
+                    <PatternContent Name="UpdateParameters" ConditionKeyMode="FieldsKeyTypeAll">
                         <ItemsSeperator>
                             <![CDATA[ , ]]>
                         </ItemsSeperator>
                         <Condition Key="OneToOnePrimaryKey"></Condition>
+                        <Condition Key="FieldsKeyNameMatch" MatchValue="CreatedUserId"></Condition>
+                        <Condition Key="FieldsKeyNameMatch" MatchValue="CreatedDate"></Condition>
                         <Condition Key="OneToOneForeignKey"><![CDATA[[:FieldNameDbEscaped:]=[:ProviderSPParamPrefix:][:FieldNameDb:]]]></Condition>
                         <Condition Key="AutoIncrementPrimaryKey"></Condition>
                         <Condition Key="AutoIncrement"></Condition>

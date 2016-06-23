@@ -124,11 +124,6 @@ namespace SalarDbCodeGenerator.Schema.Patterns
 		DatabaseProvider,
 		ProjectFiles,
 		General,
-
-        /// <summary>
-        /// Include all fields except those fields whose name begin with "Created" - useful for different behavior on updates
-        /// </summary>
-        FieldsKeyTypeNoCreated,
     }
 
 	/// <summary>

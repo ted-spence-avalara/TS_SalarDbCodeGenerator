@@ -620,7 +620,6 @@ namespace SalarDbCodeGenerator.GeneratorEngine
 						baseContent = Common.ReplaceEx(baseContent, replacementName, appliedContent, StringComparison.CurrentCulture);
 						break;
 
-                    case PatternConditionKeyMode.FieldsKeyTypeNoCreated:
                     case PatternConditionKeyMode.FieldsAll:
 					case PatternConditionKeyMode.FieldsCondensedTypeAll:
 					case PatternConditionKeyMode.FieldsKeyReadTypeAll:
@@ -1483,15 +1482,6 @@ namespace SalarDbCodeGenerator.GeneratorEngine
 
                 //    // Replace the contents
                 //    return Replacer_ConditionItem_AppliesToColumn(dbReplacer.Content, table, column);		
-                case PatternConditionKeyMode.FieldsKeyTypeNoCreated:
-                    if (!column.FieldNameDb.StartsWith("Created")) {
-                        var r = partialContent.GetFirst();
-
-                        // Replace the contents
-                        return Replacer_ConditionItem_AppliesToColumn(r.ContentText, table, column);
-                    }
-                    return "";
-
                 case PatternConditionKeyMode.FieldsAll:
 				case PatternConditionKeyMode.Field:
 					var replacer = partialContent.GetFirst();
