@@ -41,6 +41,7 @@ namespace [:Namespace:].Base
 		/// <returns>Number of rows affected</returns>
 		public int Execute(string sql, dynamic param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null)
 		{
+            EnforceSqlRules(sql);
             return _dap.Execute(sql, param, transaction, commandTimeout, commandType);
 		}
 
@@ -49,6 +50,7 @@ namespace [:Namespace:].Base
 		/// </summary>
 		public IEnumerable<dynamic> Query(string sql, dynamic param = null, IDbTransaction transaction = null, bool buffered = true, int? commandTimeout = null, CommandType? commandType = null)
 		{
+            EnforceSqlRules(sql);
             return _dap.Query(sql, param, transaction, buffered, commandTimeout, commandType);
 		}
 
@@ -61,6 +63,7 @@ namespace [:Namespace:].Base
 		/// </returns>
 		public IEnumerable<T> Query<T>(string sql, dynamic param = null, IDbTransaction transaction = null, bool buffered = true, int? commandTimeout = null, CommandType? commandType = null)
 		{
+            EnforceSqlRules(sql);
             return _dap.Query<T>(sql, param, transaction, buffered, commandTimeout, commandType);
 		}
 
@@ -69,6 +72,7 @@ namespace [:Namespace:].Base
 		/// </summary>
 		public IEnumerable<TReturn> Query<TFirst, TSecond, TReturn>(string sql, Func<TFirst, TSecond, TReturn> map, dynamic param = null, IDbTransaction transaction = null, bool buffered = true, string splitOn = "Id", int? commandTimeout = null, CommandType? commandType = null)
 		{
+            EnforceSqlRules(sql);
             return _dap.Query<TFirst, TSecond, TReturn>(sql, map, param, transaction, buffered, splitOn, commandTimeout, commandType);
 		}
 
@@ -77,6 +81,7 @@ namespace [:Namespace:].Base
 		/// </summary>
 		public IEnumerable<TReturn> Query<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(string sql, Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> map, dynamic param = null, IDbTransaction transaction = null, bool buffered = true, string splitOn = "Id", int? commandTimeout = null, CommandType? commandType = null)
 		{
+            EnforceSqlRules(sql);
             return _dap.Query<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(sql, map, param, transaction, buffered, splitOn, commandTimeout, commandType);
 		}
 
@@ -85,6 +90,7 @@ namespace [:Namespace:].Base
 		/// </summary>
 		public IEnumerable<TReturn> Query<TFirst, TSecond, TThird, TFourth, TReturn>(string sql, Func<TFirst, TSecond, TThird, TFourth, TReturn> map, dynamic param = null, IDbTransaction transaction = null, bool buffered = true, string splitOn = "Id", int? commandTimeout = null, CommandType? commandType = null)
 		{
+            EnforceSqlRules(sql);
             return _dap.Query<TFirst, TSecond, TThird, TFourth, TReturn>(sql, map, param, transaction, buffered, splitOn, commandTimeout, commandType);
 		}
 
@@ -93,6 +99,7 @@ namespace [:Namespace:].Base
 		/// </summary>
 		public IEnumerable<TReturn> Query<TFirst, TSecond, TThird, TReturn>(string sql, Func<TFirst, TSecond, TThird, TReturn> map, dynamic param = null, IDbTransaction transaction = null, bool buffered = true, string splitOn = "Id", int? commandTimeout = null, CommandType? commandType = null)
 		{
+            EnforceSqlRules(sql);
             return _dap.Query<TFirst, TSecond, TThird, TReturn>(sql, map, param, transaction, buffered, splitOn, commandTimeout, commandType);
 		}
 
@@ -101,9 +108,30 @@ namespace [:Namespace:].Base
 		/// </summary>
 		public SqlMapper.GridReader QueryMultiple(string sql, dynamic param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null)
 		{
+            EnforceSqlRules(sql);
             return _dap.QueryMultiple(sql, param, transaction, commandTimeout, commandType);
 		}
 
+		/// <summary>
+		/// To implement custom rules that get triggered on each SQL execution, override this function.
+        /// By default, this function enforces two rules:
+        ///  - If the configuration setting "SqlDiagnostics" is set to true, prints out all SQL strings to the debug diagnostics
+        ///  - If the configuration setting "ArtificialLatency" is set to a number, delays the specified number of milliseconds before each query
+		/// </summary>
+        public virtual void EnforceSqlRules(string sql)
+        {
+            if (SqlDiagnostics) {
+                System.Diagnostics.Debug.WriteLine("SQL statement executed via Dapper: {0}", sql);
+            }
+            if (ArtificialLatency > 0) {
+                System.Diagnostics.Debug.WriteLine("Artificial ORM latency of {0} enforced to encourage programmers to reduce SQL calls wherever possible.", ArtificialLatency);
+                System.Threading.Thread.Sleep(ArtificialLatency);
+            }
+        }
+        
+        public static bool SqlDiagnostics { get; set; }
+        public static int ArtificialLatency { get; set; }
+        
 		public void Dispose()
 		{
             if(_dap != null)
