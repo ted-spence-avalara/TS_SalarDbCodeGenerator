@@ -144,7 +144,6 @@ namespace [:Namespace:].Entities
 
         public void Insert(IEnumerable<[:TableName:]> models, int userid, IDbTransaction transaction = null)
         {
-            [#SetCreatedFields#]
             foreach (var obj in models) {
                 Insert(obj, userid, transaction);
             }

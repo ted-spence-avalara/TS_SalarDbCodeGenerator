@@ -121,10 +121,10 @@ namespace [:Namespace:].Base
         public virtual void EnforceSqlRules(string sql)
         {
             if (SqlDiagnostics) {
-                System.Diagnostics.Debug.WriteLine("SQL statement executed via Dapper: {0}", sql);
+                System.Diagnostics.Debug.WriteLine(String.Format("SQL statement executed via Dapper: {0}", sql));
             }
             if (ArtificialLatency > 0) {
-                System.Diagnostics.Debug.WriteLine("Artificial ORM latency of {0} enforced to encourage programmers to reduce SQL calls wherever possible.", ArtificialLatency);
+                System.Diagnostics.Debug.WriteLine(String.Format("Artificial ORM latency of {0} enforced to encourage programmers to reduce SQL calls wherever possible.", ArtificialLatency));
                 System.Threading.Thread.Sleep(ArtificialLatency);
             }
         }
@@ -134,8 +134,7 @@ namespace [:Namespace:].Base
         
 		public void Dispose()
 		{
-            if(_dap != null)
-            {
+            if (_dap != null) {
                 _dap.Dispose();
                 _dap = null;
             }
