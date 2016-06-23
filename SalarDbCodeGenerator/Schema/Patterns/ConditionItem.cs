@@ -36,6 +36,9 @@ namespace SalarDbCodeGenerator.Schema.Patterns
 		[XmlText]
 		public string ContentText { get; set; }
 
+        [XmlAttribute]
+        public string MatchValue { get; set; }
+
 		public override string ToString()
 		{
 			return Key;

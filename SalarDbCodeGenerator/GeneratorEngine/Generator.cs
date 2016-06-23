@@ -620,7 +620,8 @@ namespace SalarDbCodeGenerator.GeneratorEngine
 						baseContent = Common.ReplaceEx(baseContent, replacementName, appliedContent, StringComparison.CurrentCulture);
 						break;
 
-					case PatternConditionKeyMode.FieldsAll:
+                    case PatternConditionKeyMode.FieldsKeyTypeNoCreated:
+                    case PatternConditionKeyMode.FieldsAll:
 					case PatternConditionKeyMode.FieldsCondensedTypeAll:
 					case PatternConditionKeyMode.FieldsKeyReadTypeAll:
 					case PatternConditionKeyMode.FieldsKeyTypeAll:
@@ -1455,35 +1456,43 @@ namespace SalarDbCodeGenerator.GeneratorEngine
 		{
 			switch (partialContent.ConditionKeyMode)
 			{
-				//case PatternConditionKeyMode.DatabaseProvider:
-				//    ConditionItem dbReplacer = null;
+                //case PatternConditionKeyMode.DatabaseProvider:
+                //    ConditionItem dbReplacer = null;
 
-				//    switch (this._database.Provider)
-				//    {
-				//        case DatabaseProvider.Oracle:
-				//            dbReplacer = partialContent.GetReplacement(ConditionKeyModeConsts.DatabaseProvider._Oracle);
-				//            break;
+                //    switch (this._database.Provider)
+                //    {
+                //        case DatabaseProvider.Oracle:
+                //            dbReplacer = partialContent.GetReplacement(ConditionKeyModeConsts.DatabaseProvider._Oracle);
+                //            break;
 
-				//        case DatabaseProvider.SQLServer:
-				//            dbReplacer = partialContent.GetReplacement(ConditionKeyModeConsts.DatabaseProvider.SQLServer);
-				//            break;
+                //        case DatabaseProvider.SQLServer:
+                //            dbReplacer = partialContent.GetReplacement(ConditionKeyModeConsts.DatabaseProvider.SQLServer);
+                //            break;
 
-				//        case DatabaseProvider.SQLite:
-				//            dbReplacer = partialContent.GetReplacement(ConditionKeyModeConsts.DatabaseProvider.SQLite);
-				//            break;
+                //        case DatabaseProvider.SQLite:
+                //            dbReplacer = partialContent.GetReplacement(ConditionKeyModeConsts.DatabaseProvider.SQLite);
+                //            break;
 
-				//        case DatabaseProvider.SqlCe4:
-				//            dbReplacer = partialContent.GetReplacement(ConditionKeyModeConsts.DatabaseProvider.SqlCe4);
-				//            break;
-				//    }
+                //        case DatabaseProvider.SqlCe4:
+                //            dbReplacer = partialContent.GetReplacement(ConditionKeyModeConsts.DatabaseProvider.SqlCe4);
+                //            break;
+                //    }
 
-				//    if (dbReplacer == null)
-				//        return "";
+                //    if (dbReplacer == null)
+                //        return "";
 
-				//    // Replace the contents
-				//    return Replacer_ConditionItem_AppliesToColumn(dbReplacer.Content, table, column);		
+                //    // Replace the contents
+                //    return Replacer_ConditionItem_AppliesToColumn(dbReplacer.Content, table, column);		
+                case PatternConditionKeyMode.FieldsKeyTypeNoCreated:
+                    if (!column.FieldNameDb.StartsWith("Created")) {
+                        var r = partialContent.GetFirst();
 
-				case PatternConditionKeyMode.FieldsAll:
+                        // Replace the contents
+                        return Replacer_ConditionItem_AppliesToColumn(r.ContentText, table, column);
+                    }
+                    return "";
+
+                case PatternConditionKeyMode.FieldsAll:
 				case PatternConditionKeyMode.Field:
 					var replacer = partialContent.GetFirst();
 
@@ -1599,9 +1608,15 @@ namespace SalarDbCodeGenerator.GeneratorEngine
 			// Key type
 			bool dataTypeNotNullable = !column.DataTypeNullable;
 
+            // Search for a name match replacement first
+            foreach (var repItem in partialContent.Conditions) {
+                if (String.Equals(repItem.Key, ConditionKeyModeConsts.FieldKeyType.FieldsKeyNameMatch) && String.Equals(repItem.MatchValue, column.FieldNameDb)) {
+                    return repItem;
+                }
+            }
 
-			if (column.PrimaryKey && column.AutoIncrement && table.HasOneToOneRelation())
-			{
+            // Back to your normally scheduled replacements
+            if (column.PrimaryKey && column.AutoIncrement && table.HasOneToOneRelation()) {
 				keyTypeReplacer = partialContent.GetReplacement(ConditionKeyModeConsts.FieldKeyType.OneToOnePrimaryKey);
 			}
 			else if (column.PrimaryKey && table.HasOneToOneRelation())

@@ -123,8 +123,13 @@ namespace SalarDbCodeGenerator.Schema.Patterns
 		/// </summary>
 		DatabaseProvider,
 		ProjectFiles,
-		General
-	}
+		General,
+
+        /// <summary>
+        /// Include all fields except those fields whose name begin with "Created" - useful for different behavior on updates
+        /// </summary>
+        FieldsKeyTypeNoCreated,
+    }
 
 	/// <summary>
 	/// Content key mode for pattern content
@@ -208,10 +213,16 @@ namespace SalarDbCodeGenerator.Schema.Patterns
 			/// </summary>
 			public const string OneToOnePrimaryKey = "OneToOnePrimaryKey";
 
-			/// <summary>
-			/// One-to-one the dependant foreign key, Is PrimaryKey
-			/// </summary>
-			public const string OneToOneForeignKey = "OneToOneForeignKey";
+
+            /// <summary>
+            /// Only match fields with specific signatures
+            /// </summary>
+            public const string FieldsKeyNameMatch = "FieldsKeyNameMatch";
+
+            /// <summary>
+            /// One-to-one the dependant foreign key, Is PrimaryKey
+            /// </summary>
+            public const string OneToOneForeignKey = "OneToOneForeignKey";
 			public const string AutoIncrementPrimaryKey = "AutoIncrementPrimaryKey";
 			public const string AutoIncNativeNullable = "AutoIncNativeNullable";
 			public const string AutoIncNullableType = "AutoIncNullableType";
