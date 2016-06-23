@@ -18,11 +18,11 @@ namespace [:Namespace:].Base
 {
     public interface IDap<T> : IDap
     {
-        void Update(T model, int userid, IDbTransaction transaction = null);
-        void Update(IEnumerable<T> model, int userid, IDbTransaction transaction = null);
+        void Update(T model, int userid);
+        void Update(IEnumerable<T> model, int userid);
 
-        void Insert(T model, int userid, IDbTransaction transaction = null);
-        void Insert(IEnumerable<T> model, int userid, IDbTransaction transaction = null);
+        void Insert(T model, int userid);
+        void Insert(IEnumerable<T> model, int userid);
 
         IEnumerable<T> GetAll();
         IEnumerable<T> GetTop(int count);
@@ -40,11 +40,11 @@ namespace [:Namespace:].Base
     /// <typeparam name="T"></typeparam>
     public interface IDapWithBytePrimaryKey<T> : IDap<T>
     {
-        Byte InsertWithId(T model, int userid, IDbTransaction transaction = null);
+        Byte InsertWithId(T model, int userid);
 
         T GetByPrimaryKey(Byte id);
 
-        void Delete(Byte id, IDbTransaction transaction = null);
+        void Delete(Byte id);
     }
 
 	/// <summary>
@@ -53,11 +53,11 @@ namespace [:Namespace:].Base
     /// <typeparam name="T"></typeparam>
 	public interface IDapWithInt16PrimaryKey<T> : IDap<T>
     {
-        Int16 InsertWithId(T model, int userid, IDbTransaction transaction = null);
+        Int16 InsertWithId(T model, int userid);
 
         T GetByPrimaryKey(Int16 id);
 
-        void Delete(Int16 id, IDbTransaction transaction = null);
+        void Delete(Int16 id);
     }
 
 	/// <summary>
@@ -66,11 +66,11 @@ namespace [:Namespace:].Base
     /// <typeparam name="T"></typeparam>
 	public interface IDapWithInt32PrimaryKey<T> : IDap<T>
     {
-        Int32 InsertWithId(T model, int userid, IDbTransaction transaction = null);
+        Int32 InsertWithId(T model, int userid);
 
         T GetByPrimaryKey(Int32 id);
 
-        void Delete(Int32 id, IDbTransaction transaction = null);
+        void Delete(Int32 id);
     }
 	
 	/// <summary>
@@ -79,11 +79,11 @@ namespace [:Namespace:].Base
     /// <typeparam name="T"></typeparam>
 	public interface IDapWithInt64PrimaryKey<T> : IDap<T>
     {
-        Int64 InsertWithId(T model, int userid, IDbTransaction transaction = null);
+        Int64 InsertWithId(T model, int userid);
 
         T GetByPrimaryKey(Int64 id);
 
-        void Delete(Int64 id, IDbTransaction transaction = null);
+        void Delete(Int64 id);
     }
 	
 	/// <summary>
@@ -92,11 +92,11 @@ namespace [:Namespace:].Base
     /// <typeparam name="T"></typeparam>
 	public interface IDapWithStringPrimaryKey<T> : IDap<T>
     {
-        String InsertWithId(T model, int userid, IDbTransaction transaction = null);
+        String InsertWithId(T model, int userid);
 
         T GetByPrimaryKey(String id);
 
-        void Delete(String id, IDbTransaction transaction = null);
+        void Delete(String id);
     }
 }
 ]]>

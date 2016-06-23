@@ -19,15 +19,35 @@ namespace [:Namespace:].Base
 {
 	public abstract partial class BaseDap : IDisposable
 	{
-		private Dap _dap;
+        private Dap _dap;
 
+        /// <summary>
+        /// Construct a new dapper object that will create a connection of its own
+        /// </summary>
+        /// <param name="dbConnectionFactory"></param>
 		protected BaseDap(IDbConnectionFactory dbConnectionFactory)
-		{
-            DbConnectionFactory = dbConnectionFactory;
-			_dap = new Dap(dbConnectionFactory);
-		}
-        
-        public IDbConnectionFactory DbConnectionFactory { get; private set; }
+        {
+            _dap = new Dap(dbConnectionFactory);
+        }
+
+        /// <summary>
+        /// Construct a dapper object that will share another object's connection & transaction
+        /// </summary>
+        /// <param name="otherdap"></param>
+        protected BaseDap(BaseDap otherdap)
+        {
+            _dap = new Dap(otherdap._dap);
+        }
+
+        public void BeginTransaction()
+        {
+            _dap.BeginTransaction();
+        }
+
+        public void CommitTransaction()
+        {
+            _dap.CommitTransaction();
+        }
 
         public abstract string GetSqlTableName();
 
@@ -35,89 +55,89 @@ namespace [:Namespace:].Base
 
         public abstract string GetPrimaryKeyFieldName();
 
-		/// <summary>
-		/// Execute parameterized SQL  
-		/// </summary>
-		/// <returns>Number of rows affected</returns>
-		public int Execute(string sql, dynamic param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null)
-		{
+        /// <summary>
+        /// Execute parameterized SQL  
+        /// </summary>
+        /// <returns>Number of rows affected</returns>
+        public int Execute(string sql, dynamic param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null)
+        {
             EnforceSqlRules(sql);
             return _dap.Execute(sql, param, transaction, commandTimeout, commandType);
-		}
+        }
 
-		/// <summary>
-		/// Return a list of dynamic objects, reader is closed after the call
-		/// </summary>
-		public IEnumerable<dynamic> Query(string sql, dynamic param = null, IDbTransaction transaction = null, bool buffered = true, int? commandTimeout = null, CommandType? commandType = null)
-		{
+        /// <summary>
+        /// Return a list of dynamic objects, reader is closed after the call
+        /// </summary>
+        public IEnumerable<dynamic> Query(string sql, dynamic param = null, IDbTransaction transaction = null, bool buffered = true, int? commandTimeout = null, CommandType? commandType = null)
+        {
             EnforceSqlRules(sql);
             return _dap.Query(sql, param, transaction, buffered, commandTimeout, commandType);
-		}
+        }
 
-		/// <summary>
-		/// Executes a query, returning the data typed as per T
-		/// </summary>
-		/// <remarks>the dynamic param may seem a bit odd, but this works around a major usability issue in vs, if it is Object vs completion gets annoying. Eg type new [space] get new object</remarks>
-		/// <returns>A sequence of data of the supplied type; if a basic type (int, string, etc) is queried then the data from the first column in assumed, otherwise an instance is
-		/// created per row, and a direct column-name===member-name mapping is assumed (case insensitive).
-		/// </returns>
-		public IEnumerable<T> Query<T>(string sql, dynamic param = null, IDbTransaction transaction = null, bool buffered = true, int? commandTimeout = null, CommandType? commandType = null)
-		{
+        /// <summary>
+        /// Executes a query, returning the data typed as per T
+        /// </summary>
+        /// <remarks>the dynamic param may seem a bit odd, but this works around a major usability issue in vs, if it is Object vs completion gets annoying. Eg type new [space] get new object</remarks>
+        /// <returns>A sequence of data of the supplied type; if a basic type (int, string, etc) is queried then the data from the first column in assumed, otherwise an instance is
+        /// created per row, and a direct column-name===member-name mapping is assumed (case insensitive).
+        /// </returns>
+        public IEnumerable<T> Query<T>(string sql, dynamic param = null, IDbTransaction transaction = null, bool buffered = true, int? commandTimeout = null, CommandType? commandType = null)
+        {
             EnforceSqlRules(sql);
             return _dap.Query<T>(sql, param, transaction, buffered, commandTimeout, commandType);
-		}
+        }
 
-		/// <summary>
-		/// Maps a query to objects
-		/// </summary>
-		public IEnumerable<TReturn> Query<TFirst, TSecond, TReturn>(string sql, Func<TFirst, TSecond, TReturn> map, dynamic param = null, IDbTransaction transaction = null, bool buffered = true, string splitOn = "Id", int? commandTimeout = null, CommandType? commandType = null)
-		{
+        /// <summary>
+        /// Maps a query to objects
+        /// </summary>
+        public IEnumerable<TReturn> Query<TFirst, TSecond, TReturn>(string sql, Func<TFirst, TSecond, TReturn> map, dynamic param = null, IDbTransaction transaction = null, bool buffered = true, string splitOn = "Id", int? commandTimeout = null, CommandType? commandType = null)
+        {
             EnforceSqlRules(sql);
             return _dap.Query<TFirst, TSecond, TReturn>(sql, map, param, transaction, buffered, splitOn, commandTimeout, commandType);
-		}
+        }
 
-		/// <summary>
-		/// Perform a multi mapping query with 5 input parameters
-		/// </summary>
-		public IEnumerable<TReturn> Query<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(string sql, Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> map, dynamic param = null, IDbTransaction transaction = null, bool buffered = true, string splitOn = "Id", int? commandTimeout = null, CommandType? commandType = null)
-		{
+        /// <summary>
+        /// Perform a multi mapping query with 5 input parameters
+        /// </summary>
+        public IEnumerable<TReturn> Query<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(string sql, Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> map, dynamic param = null, IDbTransaction transaction = null, bool buffered = true, string splitOn = "Id", int? commandTimeout = null, CommandType? commandType = null)
+        {
             EnforceSqlRules(sql);
             return _dap.Query<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(sql, map, param, transaction, buffered, splitOn, commandTimeout, commandType);
-		}
+        }
 
-		/// <summary>
-		/// Perform a multi mapping query with 4 input parameters
-		/// </summary>
-		public IEnumerable<TReturn> Query<TFirst, TSecond, TThird, TFourth, TReturn>(string sql, Func<TFirst, TSecond, TThird, TFourth, TReturn> map, dynamic param = null, IDbTransaction transaction = null, bool buffered = true, string splitOn = "Id", int? commandTimeout = null, CommandType? commandType = null)
-		{
+        /// <summary>
+        /// Perform a multi mapping query with 4 input parameters
+        /// </summary>
+        public IEnumerable<TReturn> Query<TFirst, TSecond, TThird, TFourth, TReturn>(string sql, Func<TFirst, TSecond, TThird, TFourth, TReturn> map, dynamic param = null, IDbTransaction transaction = null, bool buffered = true, string splitOn = "Id", int? commandTimeout = null, CommandType? commandType = null)
+        {
             EnforceSqlRules(sql);
             return _dap.Query<TFirst, TSecond, TThird, TFourth, TReturn>(sql, map, param, transaction, buffered, splitOn, commandTimeout, commandType);
-		}
+        }
 
-		/// <summary>
-		/// Maps a query to objects
-		/// </summary>
-		public IEnumerable<TReturn> Query<TFirst, TSecond, TThird, TReturn>(string sql, Func<TFirst, TSecond, TThird, TReturn> map, dynamic param = null, IDbTransaction transaction = null, bool buffered = true, string splitOn = "Id", int? commandTimeout = null, CommandType? commandType = null)
-		{
+        /// <summary>
+        /// Maps a query to objects
+        /// </summary>
+        public IEnumerable<TReturn> Query<TFirst, TSecond, TThird, TReturn>(string sql, Func<TFirst, TSecond, TThird, TReturn> map, dynamic param = null, IDbTransaction transaction = null, bool buffered = true, string splitOn = "Id", int? commandTimeout = null, CommandType? commandType = null)
+        {
             EnforceSqlRules(sql);
             return _dap.Query<TFirst, TSecond, TThird, TReturn>(sql, map, param, transaction, buffered, splitOn, commandTimeout, commandType);
-		}
+        }
 
-		/// <summary>
-		/// Execute a command that returns multiple result sets, and access each in turn
-		/// </summary>
-		public SqlMapper.GridReader QueryMultiple(string sql, dynamic param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null)
-		{
+        /// <summary>
+        /// Execute a command that returns multiple result sets, and access each in turn
+        /// </summary>
+        public SqlMapper.GridReader QueryMultiple(string sql, dynamic param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null)
+        {
             EnforceSqlRules(sql);
             return _dap.QueryMultiple(sql, param, transaction, commandTimeout, commandType);
-		}
+        }
 
-		/// <summary>
-		/// To implement custom rules that get triggered on each SQL execution, override this function.
+        /// <summary>
+        /// To implement custom rules that get triggered on each SQL execution, override this function.
         /// By default, this function enforces two rules:
         ///  - If the configuration setting "SqlDiagnostics" is set to true, prints out all SQL strings to the debug diagnostics
         ///  - If the configuration setting "ArtificialLatency" is set to a number, delays the specified number of milliseconds before each query
-		/// </summary>
+        /// </summary>
         public virtual void EnforceSqlRules(string sql)
         {
             if (SqlDiagnostics) {
@@ -128,18 +148,18 @@ namespace [:Namespace:].Base
                 System.Threading.Thread.Sleep(ArtificialLatency);
             }
         }
-        
+
         public static bool SqlDiagnostics { get; set; }
         public static int ArtificialLatency { get; set; }
-        
-		public void Dispose()
-		{
+
+        public void Dispose()
+        {
             if (_dap != null) {
                 _dap.Dispose();
                 _dap = null;
             }
-		}
-	}
+        }
+    }
 }
 ]]>
 	</BaseContent>
