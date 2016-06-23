@@ -389,8 +389,8 @@ namespace [:Namespace:].Entities
                 <Condition Key="WithPrimaryKey">
                     <![CDATA[
         public const string SqlInsertCommand = "INSERT INTO [:TableOwnerNameAsPrefix:][:TableNameDb:] ([#InsertParametersName#]) VALUES ([#InsertParametersValue#]) ";
-        public const string SqlUpdateCommand = "UPDATE [:TableOwnerNameAsPrefix:][:TableNameDb:] SET [#UpdateParameters#] WHERE [#PrimaryKeyParameters#]";
-        public const string SqlDeleteCommand = "DELETE FROM [:TableOwnerNameAsPrefix:][:TableNameDb:] WHERE [#PrimaryKeyParameters#]";
+        public const string SqlUpdateCommand = "UPDATE [:TableOwnerNameAsPrefix:][:TableNameDb:] SET [#UpdateParameters#] WHERE [#PrimaryKeyParameters#]; SELECT @@ROWCOUNT;";
+        public const string SqlDeleteCommand = "DELETE FROM [:TableOwnerNameAsPrefix:][:TableNameDb:] WHERE [#PrimaryKeyParameters#]; SELECT @@ROWCOUNT;";
         public const string SqlInsertWithIdCommand = "INSERT INTO [:TableOwnerNameAsPrefix:][:TableNameDb:] ([#InsertParametersName#]) VALUES ([#InsertParametersValue#]) [:InsertWithIdSuffix:] SELECT scope_identity();";
         ]]>
                 </Condition>
