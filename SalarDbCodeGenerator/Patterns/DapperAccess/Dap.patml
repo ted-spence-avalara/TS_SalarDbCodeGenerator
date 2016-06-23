@@ -59,13 +59,7 @@ namespace [:Namespace:].Base
 
         public IDbTransaction BeginTransaction()
         {
-            if (_connection_owned_by_this_object) {
-                OpenConnection();
-                _transaction = _connection.BeginTransaction(IsolationLevel.ReadCommitted);
-                return _transaction;
-            } else {
-                throw new Exception("This dapper object does not own this connection and cannot control the transaction.");
-            }
+            return BeginTransaction(IsolationLevel.ReadCommitted);
         }
 
         public IDbTransaction BeginTransaction(IsolationLevel isolationLevel)
