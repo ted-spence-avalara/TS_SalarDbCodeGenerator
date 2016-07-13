@@ -15,8 +15,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
-using [:Namespace:].Base;
-using [:Namespace:].Entities;
+using Avalara.SafeFetch.Base;
  
 namespace [:Namespace:].Entities
 {
@@ -122,7 +121,7 @@ namespace [:Namespace:].Entities
 
             <PatternContent Name="ClassDeclaration" ConditionKeyMode="TablePrimaryKey">
                 <Condition Key="WithPrimaryKey">
-                <![CDATA[public partial class [:TableName:]Dap : BaseDap, IDapWith[:PrimaryKeyDotNetType:]PrimaryKey<[:TableName:]>]]>
+                <![CDATA[public partial class [:TableName:]Dap : BaseDap, IDapWithPrimaryKey<[:PrimaryKeyDotNetType:],[:TableName:]>]]>
                 </Condition>
                 <Condition Key="ReadOnlyTable">
                     <![CDATA[public partial class [:TableName:]Dap : BaseDap]]>

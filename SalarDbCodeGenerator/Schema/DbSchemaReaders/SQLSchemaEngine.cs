@@ -919,7 +919,7 @@ namespace SalarDbCodeGenerator.Schema.DbSchemaReaders
 								{
 									// description found!
 									column.UserDescription = descriptionData.DefaultView[0].Row["value"].ToString();
-									column.UserDescription = column.UserDescription.Replace("\r\n", " ").Replace("\n", " ");
+									column.UserDescription = column.UserDescription.Replace("\r\n", " ").Replace("\n", " ").Replace("\"","\\\"");
 								}
 							}
 					}

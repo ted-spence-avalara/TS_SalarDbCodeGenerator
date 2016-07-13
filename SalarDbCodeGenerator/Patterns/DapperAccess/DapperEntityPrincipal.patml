@@ -12,7 +12,7 @@
 	<BaseContent>
 		<![CDATA[using System;
 using System.ComponentModel.DataAnnotations;
-using [:Namespace:].Base;
+using Avalara.SafeFetch.Base;
  
 namespace [:Namespace:].Entities
 {
@@ -25,7 +25,7 @@ namespace [:Namespace:].Entities
 		<BaseContent>[:InnerContent:]</BaseContent>
 		<Condition Key="TheReplacement">
 			<![CDATA[
-	public partial class [:TableName:] : BaseModel
+	public partial class [:TableName:] : EntityBase
 	{
 [#FieldsProperties#]
 	}

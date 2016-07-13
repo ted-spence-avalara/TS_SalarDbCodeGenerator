@@ -12,7 +12,7 @@
 	<BaseContent>
 		<![CDATA[using System;
 using System.ComponentModel.DataAnnotations;
-using [:Namespace:].Base;
+using Avalara.SafeFetch.Base;
 
 namespace [:Namespace:].Entities
 {

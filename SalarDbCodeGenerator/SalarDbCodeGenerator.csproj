@@ -150,12 +150,6 @@
     <Compile Include="GeneratorEngine\Generator.cs" />
     <Compile Include="GeneratorEngine\ReplaceConsts.cs" />
     <Compile Include="GeneratorEngine\SchemaAnalyzer.cs" />
-    <None Include="Patterns\DapperAccess\Dap.patml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Patterns\DapperAccess\IDbConnectionFactory.patml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <Compile Include="Schema\Database\DbForeignKeyAction.cs" />
     <Compile Include="Schema\Database\DbTable.cs" />
     <Compile Include="Schema\Database\DbView.cs" />
@@ -301,13 +295,6 @@
     <None Include="Patterns\3Tier VB.NET\VS2010ClassProject.patml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="Patterns\DapperAccess\BaseDap.patml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Patterns\DapperAccess\BaseModel.patml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="Patterns\DapperAccess\DapperAccess C# Pattern.dbpat">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -322,9 +309,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Patterns\DapperAccess\DapperEntityUser.patml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Patterns\DapperAccess\IDap.patml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Patterns\DapperContext\AppConfig.patml">
@@ -765,7 +749,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_BuildVersioningStyle="None.None.YearStamp.MonthAndDayStamp" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_UpdateFileVersion="True" />
+      <UserProperties BuildVersion_UpdateFileVersion="True" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_BuildVersioningStyle="None.None.YearStamp.MonthAndDayStamp" />
     </VisualStudio>
   </ProjectExtensions>
   <PropertyGroup>
