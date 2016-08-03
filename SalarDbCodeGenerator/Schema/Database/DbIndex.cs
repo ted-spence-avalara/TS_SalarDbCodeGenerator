@@ -50,5 +50,45 @@ namespace SalarDbCodeGenerator.Schema.Database
             }
             return sb.ToString();
 		}
-	}
+
+        public string GetParameterList()
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (var key in Keys) {
+                sb.Append(key.KeyColumn.DataTypeDotNet);
+                sb.Append(" ");
+                sb.Append(key.KeyColumn.FieldNameSchema);
+                sb.Append(", ");
+            }
+            if (sb.Length > 0) sb.Length -= 2;
+            return sb.ToString();
+        }
+
+        public string GetParameterAssignments()
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (var key in Keys) {
+                sb.Append(key.KeyColumn.FieldNameSchema);
+                sb.Append(" = ");
+                sb.Append(key.KeyColumn.FieldNameSchema);
+                sb.Append(", ");
+            }
+            if (sb.Length > 0) sb.Length -= 2;
+            return sb.ToString();
+        }
+
+        public string GetMatchClause()
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (var key in Keys) {
+                sb.Append("@");
+                sb.Append(key.KeyColumn.FieldNameSchema);
+                sb.Append(" = ");
+                sb.Append(key.KeyColumn.FieldNameSchema);
+                sb.Append(" AND ");
+            }
+            if (sb.Length > 0) sb.Length -= 5;
+            return sb.ToString();
+        }
+    }
 }

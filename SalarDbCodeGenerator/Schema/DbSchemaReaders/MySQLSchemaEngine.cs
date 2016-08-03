@@ -611,13 +611,13 @@ WHERE INFORMATION_SCHEMA.COLUMNS.TABLE_SCHEMA = DATABASE()";
 								// constraint Key
 								var constraintKey = new DbConstraintKey()
 								{
-									IsUnique = keyRow["IsUnique"].ToString() == "1",
+									//IsUnique = keyRow["IsUnique"].ToString() == "1",
 									KeyColumnName = keyRow["ColumnName"].ToString(),
-									KeyName = keyRow["IndexName"].ToString()
+									//KeyName = keyRow["IndexName"].ToString()
 								};
 
 								// constraint keys
-								table.Indexes.Add(constraintKey);
+								//table.Indexes.Add(constraintKey);
 
 								// find key column
 								DbColumn keyColumn = table.FindColumnDb(constraintKey.KeyColumnName);
@@ -654,7 +654,7 @@ WHERE INFORMATION_SCHEMA.COLUMNS.TABLE_SCHEMA = DATABASE()";
 						foreignIsUnique = true;
 					else
 					{
-						var fkeyC = table.Indexes.FirstOrDefault(x => x.KeyColumnName == fkey.ForeignColumnName);
+						var fkeyC = table.Indexes.FirstOrDefault(x => x.Keys.Count == 1 && x.Keys[0].KeyColumnName == fkey.ForeignColumnName);
 						if (fkeyC != null)
 						{
 							if (fkeyC.IsUnique)
@@ -666,7 +666,7 @@ WHERE INFORMATION_SCHEMA.COLUMNS.TABLE_SCHEMA = DATABASE()";
 						localIsUnique = true;
 					else
 					{
-						var lkeyC = table.Indexes.FirstOrDefault(x => x.KeyColumnName == fkey.LocalColumnName);
+						var lkeyC = table.Indexes.FirstOrDefault(x => x.Keys.Count == 1 && x.Keys[0].KeyColumnName == fkey.LocalColumnName);
 						if (lkeyC != null)
 						{
 							if (lkeyC.IsUnique)
@@ -704,7 +704,7 @@ WHERE INFORMATION_SCHEMA.COLUMNS.TABLE_SCHEMA = DATABASE()";
 					var constraintKey = table.Indexes[j];
 
 					// no primary keys are allowed
-					if (constraintKey.KeyColumn != null && constraintKey.KeyColumn.PrimaryKey)
+					if (constraintKey.Keys[0].KeyColumn != null && constraintKey.Keys[0].KeyColumn.PrimaryKey)
 					{
 						// There is no need in keeping the primary key
 						table.Indexes.RemoveAt(j);
@@ -713,7 +713,7 @@ WHERE INFORMATION_SCHEMA.COLUMNS.TABLE_SCHEMA = DATABASE()";
 
 					// first look in the foreign keys!
 					var index = table.ForeignKeys.FindIndex(x =>
-						x.LocalColumnName == constraintKey.KeyColumnName);
+						x.LocalColumnName == constraintKey.Keys[0].KeyColumnName);
 
 					if (index != -1)
 					{
@@ -727,7 +727,7 @@ WHERE INFORMATION_SCHEMA.COLUMNS.TABLE_SCHEMA = DATABASE()";
 					if (constraintKey.IsUnique == false)
 					{
 						index = table.Indexes.FindIndex(x =>
-							x.KeyColumnName == constraintKey.KeyColumnName
+							x.Keys[0].KeyColumnName == constraintKey.Keys[0].KeyColumnName
 							&& x.IsUnique == true);
 
 						if (index != -1)
@@ -740,7 +740,7 @@ WHERE INFORMATION_SCHEMA.COLUMNS.TABLE_SCHEMA = DATABASE()";
 					else
 					{
 						var notUniqueKeys = table.Indexes.FindAll(x =>
-							x.KeyColumnName == constraintKey.KeyColumnName
+							x.Keys[0].KeyColumnName == constraintKey.Keys[0].KeyColumnName
 							&& x.IsUnique == false);
 
 						if (notUniqueKeys.Count > 0)
@@ -752,7 +752,7 @@ WHERE INFORMATION_SCHEMA.COLUMNS.TABLE_SCHEMA = DATABASE()";
 					}
 
 					// look for duplication constraint key
-					if (duplicateConstraints.Contains(constraintKey.KeyColumnName))
+					if (duplicateConstraints.Contains(constraintKey.Keys[0].KeyColumnName))
 					{
 						// the column with index is already there
 						table.Indexes.RemoveAt(j);
@@ -760,7 +760,7 @@ WHERE INFORMATION_SCHEMA.COLUMNS.TABLE_SCHEMA = DATABASE()";
 					}
 
 					// all to the constraint key list
-					duplicateConstraints.Add(constraintKey.KeyColumnName);
+					duplicateConstraints.Add(constraintKey.Keys[0].KeyColumnName);
 				}
 			}
 		}

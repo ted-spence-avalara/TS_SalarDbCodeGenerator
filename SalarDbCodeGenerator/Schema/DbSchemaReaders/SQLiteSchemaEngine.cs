@@ -224,7 +224,7 @@ namespace SalarDbCodeGenerator.Schema.DbSchemaReaders
 						foreignIsUnique = true;
 					else
 					{
-						var fkeyC = table.Indexes.FirstOrDefault(x => x.KeyColumnName == fkey.ForeignColumnName);
+						var fkeyC = table.Indexes.FirstOrDefault(x => x.Keys[0].KeyColumnName == fkey.ForeignColumnName);
 						if (fkeyC != null)
 						{
 							if (fkeyC.IsUnique)
@@ -236,7 +236,7 @@ namespace SalarDbCodeGenerator.Schema.DbSchemaReaders
 						localIsUnique = true;
 					else
 					{
-						var lkeyC = table.Indexes.FirstOrDefault(x => x.KeyColumnName == fkey.LocalColumnName);
+						var lkeyC = table.Indexes.FirstOrDefault(x => x.Keys[0].KeyColumnName == fkey.LocalColumnName);
 						if (lkeyC != null)
 						{
 							if (lkeyC.IsUnique)

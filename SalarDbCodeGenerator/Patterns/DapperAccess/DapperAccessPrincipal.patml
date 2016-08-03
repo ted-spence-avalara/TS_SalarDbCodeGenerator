@@ -103,14 +103,14 @@ namespace [:Namespace:].Entities
             <PatternContent Name="IndexConstraintKeys" ConditionKeyMode="TableIndexConstraint">
                 <Condition Key="NormalKey">
                     <![CDATA[
-        // Index key normal pattern
-        public IEnumerable<[:TableName:]> GetBy[:IndexKeyName:]([:IndexKeyDotNetType:] [:IndexKeyName:])
+        // Index [:IndexName:] pattern
+        public IEnumerable<[:TableName:]> GetBy[:IndexKeyName:]([:IndexKeyParameterList:])
         {
-            return Query<[:TableName:]>(SqlGetBy[:IndexKeyName:]Command, new { [:IndexKeyName:] = [:IndexKeyName:] });
+            return Query<[:TableName:]>(SqlGetBy[:IndexKeyName:]Command, new { [:IndexKeyParameterAssignments:] });
         }
                 
-        public const string SqlGetBy[:IndexKeyName:]Command = "SELECT * FROM [:TableOwnerNameAsPrefix:][:TableNameDb:] WITH (nolock) WHERE [:IndexKeyNameDb:]=[:ProviderSPParamPrefix:][:IndexKeyName:]";
-        ]]>
+        public const string SqlGetBy[:IndexKeyName:]Command = "SELECT * FROM [:TableOwnerNameAsPrefix:][:TableNameDb:] WITH (nolock) WHERE [:IndexKeyMatchClause:]";
+                    ]]>
                 </Condition>
             </PatternContent>
 
