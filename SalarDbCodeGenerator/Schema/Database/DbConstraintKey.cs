@@ -18,10 +18,7 @@ namespace SalarDbCodeGenerator.Schema.Database
 	public class DbConstraintKey
 	{
 		#region properties
-		/// <summary>
-		/// Name of ForeignKey
-		/// </summary>
-		public string KeyName { get; set; }
+
 
 		/// <summary>
 		/// The column name used 
@@ -33,15 +30,11 @@ namespace SalarDbCodeGenerator.Schema.Database
 		/// </summary>
 		public DbColumn KeyColumn { get; set; }
 
-		/// <summary>
-		/// Is constraint key
-		/// </summary>
-		public bool IsUnique { get; set; }
 		#endregion
 
 		public override string ToString()
 		{
-			return KeyName + ", " + KeyColumnName;
+			return KeyColumnName;
 		}
 	}
 }

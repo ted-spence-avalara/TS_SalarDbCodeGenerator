@@ -621,7 +621,7 @@ namespace SalarDbCodeGenerator.Schema.DbSchemaReaders
 								};
 
 								// constraint keys
-								table.ConstraintKeys.Add(constraintKey);
+								table.Indexes.Add(constraintKey);
 
 								// find key column
 								DbColumn keyColumn = table.FindColumnDb(constraintKey.KeyColumnName);
@@ -658,7 +658,7 @@ namespace SalarDbCodeGenerator.Schema.DbSchemaReaders
 						foreignIsUnique = true;
 					else
 					{
-						var fkeyC = table.ConstraintKeys.FirstOrDefault(x => x.KeyColumnName == fkey.ForeignColumnName);
+						var fkeyC = table.Indexes.FirstOrDefault(x => x.KeyColumnName == fkey.ForeignColumnName);
 						if (fkeyC != null)
 						{
 							if (fkeyC.IsUnique)
@@ -670,7 +670,7 @@ namespace SalarDbCodeGenerator.Schema.DbSchemaReaders
 						localIsUnique = true;
 					else
 					{
-						var lkeyC = table.ConstraintKeys.FirstOrDefault(x => x.KeyColumnName == fkey.LocalColumnName);
+						var lkeyC = table.Indexes.FirstOrDefault(x => x.KeyColumnName == fkey.LocalColumnName);
 						if (lkeyC != null)
 						{
 							if (lkeyC.IsUnique)
@@ -695,7 +695,7 @@ namespace SalarDbCodeGenerator.Schema.DbSchemaReaders
 			// look in tables list
 			foreach (var table in result)
 			{
-				if (table.ConstraintKeys.Count == 0)
+				if (table.Indexes.Count == 0)
 				{
 					continue;
 				}
@@ -703,15 +703,15 @@ namespace SalarDbCodeGenerator.Schema.DbSchemaReaders
 				var duplicateConstraints = new StringCollection();
 
 				// fetching the contraints keys
-				for (var j = table.ConstraintKeys.Count - 1; j >= 0; j--)
+				for (var j = table.Indexes.Count - 1; j >= 0; j--)
 				{
-					var constraintKey = table.ConstraintKeys[j];
+					var constraintKey = table.Indexes[j];
 
 					// no primary keys are allowed
 					if (constraintKey.KeyColumn != null && constraintKey.KeyColumn.PrimaryKey)
 					{
 						// There is no need in keeping the primary key
-						table.ConstraintKeys.RemoveAt(j);
+						table.Indexes.RemoveAt(j);
 						continue;
 					}
 
@@ -722,7 +722,7 @@ namespace SalarDbCodeGenerator.Schema.DbSchemaReaders
 					if (index != -1)
 					{
 						// this is a foreign key and should not be here
-						table.ConstraintKeys.RemoveAt(j);
+						table.Indexes.RemoveAt(j);
 						continue;
 					}
 
@@ -730,27 +730,27 @@ namespace SalarDbCodeGenerator.Schema.DbSchemaReaders
 					// seach for a unique one if it is there
 					if (constraintKey.IsUnique == false)
 					{
-						index = table.ConstraintKeys.FindIndex(x =>
+						index = table.Indexes.FindIndex(x =>
 							x.KeyColumnName == constraintKey.KeyColumnName
 							&& x.IsUnique == true);
 
 						if (index != -1)
 						{
 							// the same and the Unique key is already there!
-							table.ConstraintKeys.RemoveAt(j);
+							table.Indexes.RemoveAt(j);
 							continue;
 						}
 					}
 					else
 					{
-						var notUniqueKeys = table.ConstraintKeys.FindAll(x =>
+						var notUniqueKeys = table.Indexes.FindAll(x =>
 							x.KeyColumnName == constraintKey.KeyColumnName
 							&& x.IsUnique == false);
 
 						if (notUniqueKeys.Count > 0)
 						{
 							// remove them
-							notUniqueKeys.ForEach(x => table.ConstraintKeys.Remove(x));
+							notUniqueKeys.ForEach(x => table.Indexes.Remove(x));
 							continue;
 						}
 					}
@@ -759,7 +759,7 @@ namespace SalarDbCodeGenerator.Schema.DbSchemaReaders
 					if (duplicateConstraints.Contains(constraintKey.KeyColumnName))
 					{
 						// the column with index is already there
-						table.ConstraintKeys.RemoveAt(j);
+						table.Indexes.RemoveAt(j);
 						continue;
 					}
 
