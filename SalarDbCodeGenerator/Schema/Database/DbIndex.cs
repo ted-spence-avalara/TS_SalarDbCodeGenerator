@@ -51,14 +51,34 @@ namespace SalarDbCodeGenerator.Schema.Database
             return sb.ToString();
 		}
 
-        public string GetParameterList()
+        public string GetIndexKeyName()
         {
             StringBuilder sb = new StringBuilder();
             foreach (var key in Keys) {
-                sb.Append(key.KeyColumn.DataTypeDotNet);
+                sb.Append(key.KeyColumn.FieldNameSchema);
+            }
+            return sb.ToString();
+        }
+
+        public string GetParameterList()
+        {
+            StringBuilder sb = new StringBuilder();
+            bool first_column = true;
+            foreach (var key in Keys) {
+
+                // First value is not nullable
+                if (first_column) {
+                    sb.Append(key.KeyColumn.DataTypeDotNet);
+                } else {
+                    sb.Append(key.KeyColumn.DataTypeDotNet);
+                    if (key.KeyColumn.DataTypeDotNet != "String") {
+                        sb.Append("?");
+                    }
+                }
                 sb.Append(" ");
                 sb.Append(key.KeyColumn.FieldNameSchema);
                 sb.Append(", ");
+                first_column = false;
             }
             if (sb.Length > 0) sb.Length -= 2;
             return sb.ToString();

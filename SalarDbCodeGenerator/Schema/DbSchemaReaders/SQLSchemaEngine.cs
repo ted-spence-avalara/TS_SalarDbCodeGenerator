@@ -631,6 +631,7 @@ namespace SalarDbCodeGenerator.Schema.DbSchemaReaders
 -- First query - identify all the indexes in the database
 SELECT o.name AS TableName
 	 , i.index_id
+     , i.object_id
 	 , i.name AS IndexName
 	 , i.is_unique AS IsUnique
 	 , i.is_primary_key AS IsPrimaryKey
@@ -645,7 +646,8 @@ SELECT o.name AS TableName
 
 -- Second query - identify all columns for these indexes
 SELECT i.index_id
-     , c.name
+     , i.object_id
+     , c.name as ColumnName
      , ic.*
   FROM sys.indexes i
 	   INNER JOIN sys.index_columns ic ON ic.object_id = i.object_id and ic.index_id = i.index_id
@@ -671,12 +673,14 @@ SELECT i.index_id
                 var IsUnique = Convert.ToBoolean(row["IsUnique"].ToString());
                 var IndexName = row["IndexName"].ToString();
                 var IndexId = (int)row["index_id"];
+                var ObjectId = (int)row["object_id"];
                 var IsPrimaryKey = Convert.ToBoolean(row["IsPrimaryKey"].ToString());
 
                 // Convert all columns to constraint keys
                 var columns = (from DataRow r2
                                  in ds.Tables[1].Rows
                               where (int)r2["index_id"] == IndexId
+                                 && (int)r2["object_id"] == ObjectId
                              select new DbConstraintKey()
                                     {
                                        KeyColumnName = r2["ColumnName"].ToString(),
@@ -684,13 +688,15 @@ SELECT i.index_id
                                     }).ToList();
 
                 // Add either a simple or a complex key
-                table.Indexes.Add(new DbIndex()
-                {
-                    Keys = columns,
-                    IsUnique = IsUnique,
-                    IndexName = IndexName,
-                    IsPrimaryKey = IsPrimaryKey
-                });
+                if (columns.Any()) {
+                    table.Indexes.Add(new DbIndex()
+                    {
+                        Keys = columns,
+                        IsUnique = IsUnique,
+                        IndexName = IndexName,
+                        IsPrimaryKey = IsPrimaryKey
+                    });
+                }
 			}
 
             // Finally - scan through each table that doesn't have a primary key and see if we can find one
