@@ -83,7 +83,9 @@ namespace [:Namespace:].Entities
             <PatternContent Name="ForeignKeys" ConditionKeyMode="FieldsForeignKeyAll">
                 <Condition Key="MultiplicityOne">
                     <![CDATA[
-        // Foreign key multiplicity-one pattern
+        /// <summary>
+        /// Foreign key multiplicity-one pattern
+        /// </summary>
         public IEnumerable<[:LocalTableName:]> GetBy[:LocalFieldName:]([:LocalFieldDotNetType:] [:LocalFieldName:])
         {
             return Query<[:LocalTableName:]>(SqlGetBy[:LocalFieldName:]Command, new { [:LocalFieldName:] = [:LocalFieldName:] });
@@ -103,32 +105,32 @@ namespace [:Namespace:].Entities
             <PatternContent Name="IndexConstraintKeys" ConditionKeyMode="TableIndexConstraint">
                 <Condition Key="NormalKey">
                     <![CDATA[
-        // Index key normal pattern
-        public IEnumerable<[:TableName:]> GetBy[:IndexKeyName:]([:IndexKeyDotNetType:] [:IndexKeyName:])
+        /// <summary>
+        /// Index [:IndexName:] pattern
+        /// </summary>
+        public IEnumerable<[:TableName:]> GetBy[:IndexKeyName:]Index([:IndexKeyParameterList:])
         {
-            return Query<[:TableName:]>(SqlGetBy[:IndexKeyName:]Command, new { [:IndexKeyName:] = [:IndexKeyName:] });
+            return Query<[:TableName:]>(SqlGetBy[:IndexKeyName:]Command, new { [:IndexKeyParameterAssignments:] });
         }
-                
-        public const string SqlGetBy[:IndexKeyName:]Command = "SELECT * FROM [:TableOwnerNameAsPrefix:][:TableNameDb:] WITH (nolock) WHERE [:IndexKeyNameDb:]=[:ProviderSPParamPrefix:][:IndexKeyName:]";
-        ]]>
+
+        public const string SqlGetBy[:IndexKeyName:]Command = "SELECT * FROM [:TableOwnerNameAsPrefix:][:TableNameDb:] WITH (nolock) WHERE [:IndexKeyMatchClause:]";
+]]>
                 </Condition>
             </PatternContent>
 
             <PatternContent Name="UniqueConstraintKeys" ConditionKeyMode="TableUniqueConstraint">
                 <Condition Key="NormalKey">
                     <![CDATA[
-        // Unique constraint key pattern
-        public [:TableName:] GetBy[:IndexKeyName:]Index([:IndexKeyDotNetType:] [:IndexKeyName:])
+        /// <summary>
+        /// Unique constraint [:IndexName:] pattern
+        /// </summary>
+        public IEnumerable<[:TableName:]> GetBy[:IndexKeyName:]Index([:IndexKeyParameterList:])
         {
-            return Query<[:TableName:]>(SqlGetBy[:IndexKeyName:]Command, new { [:IndexKeyName:] = [:IndexKeyName:] }).FirstOrDefault();
+            return Query<[:TableName:]>(SqlGetBy[:IndexKeyName:]Command, new { [:IndexKeyParameterAssignments:] });
         }
-        
-        public const string SqlGetBy[:IndexKeyName:]Command = "SELECT * FROM [:TableOwnerNameAsPrefix:][:TableNameDb:] WITH (nolock) WHERE [:IndexKeyNameDb:]=[:ProviderSPParamPrefix:][:IndexKeyName:]";
 
-        public void DeleteBy[:IndexKeyName:]([:IndexKeyDotNetType:] [:IndexKeyName:])
-        {
-            Execute(SqlDeleteCommand, new { [:IndexKeyName:] = [:IndexKeyName:] });
-        }]]>
+        public const string SqlGetBy[:IndexKeyName:]Command = "SELECT * FROM [:TableOwnerNameAsPrefix:][:TableNameDb:] WITH (nolock) WHERE [:IndexKeyMatchClause:]";
+]]>
                 </Condition>
             </PatternContent>
 
@@ -270,7 +272,9 @@ namespace [:Namespace:].Entities
                         <ItemsSeperator></ItemsSeperator>
                         <Condition Key="OneToOnePrimaryKey">
                             <![CDATA[
-        // One to One primary key pattern
+        /// <summary>
+        /// One to One primary key pattern
+        /// </summary>
         public [:TableName:] GetByPrimaryKey([:FieldDotNetType:] id)
         {
             return GetBy[:FieldName:](id);
@@ -286,7 +290,9 @@ namespace [:Namespace:].Entities
                         </Condition>
                         <Condition Key="OneToOneForeignKey">
                             <![CDATA[
-        // One to One foreign key pattern
+        /// <summary>
+        /// One to One foreign key pattern
+        /// </summary>
         public [:TableName:] GetByPrimaryKey([:FieldDotNetType:] id)
         {
             return GetBy[:FieldName:](id);
@@ -302,7 +308,9 @@ namespace [:Namespace:].Entities
                         </Condition>
                         <Condition Key="AutoIncrementPrimaryKey">
                             <![CDATA[
-        // Auto Increment primary key pattern
+        /// <summary>
+        /// Auto Increment primary key pattern
+        /// </summary>
         public [:TableName:] GetByPrimaryKey([:FieldDotNetType:] id)
         {
             return GetBy[:FieldName:](id);
@@ -321,7 +329,9 @@ namespace [:Namespace:].Entities
                         <Condition Key="AutoIncNullableType"></Condition>
                         <Condition Key="PrimaryKey">
                             <![CDATA[
-        // Basic primary key pattern
+        /// <summary>
+        /// Basic primary key pattern
+        /// </summary>
         public [:TableName:] GetByPrimaryKey([:FieldDotNetType:] id)
         {
             return GetBy[:FieldName:](id);

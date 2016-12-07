@@ -1281,7 +1281,7 @@ namespace SalarDbCodeGenerator.GeneratorEngine
 		string Replacer_ConditionItem_AppliesToIndexConstraints(string content, DbTable table, bool uniqueKeys)
 		{
 			// check if there is no constraints
-			if (table.ConstraintKeys.Count == 0)
+			if (table.Indexes.Count == 0)
 			{
 				return "";
 			}
@@ -1292,7 +1292,7 @@ namespace SalarDbCodeGenerator.GeneratorEngine
 			string result = "";
 
 			// fetch constraints keys
-			foreach (var indexKey in table.ConstraintKeys)
+			foreach (var indexKey in table.Indexes)
 			{
 				if (!indexKey.IsUnique && uniqueKeys)
 				{
@@ -1310,19 +1310,22 @@ namespace SalarDbCodeGenerator.GeneratorEngine
 				// the content copy for each foreign key
 				string indexContent = content;
 
-				// the column general replacer
-				indexContent = Replacer_ConditionItem_AppliesToColumn(indexContent, table, indexKey.KeyColumn);
+                // the column general replacer
+                indexContent = Replacer_ConditionItem_AppliesToColumn(indexContent, table, indexKey.Keys[0].KeyColumn);
 
-				// ===================================
-				indexContent = Common.ReplaceExIgnoreCase(indexContent, ReplaceConsts.IndexKeyDbType, indexKey.KeyColumn.DataTypeDb);
-				indexContent = Common.ReplaceExIgnoreCase(indexContent, ReplaceConsts.IndexKeyDbTypeSize, FieldType_ColumnDataTypeSize(indexKey.KeyColumn));
-				indexContent = Common.ReplaceExIgnoreCase(indexContent, ReplaceConsts.IndexKeyDataType, indexKey.KeyColumn.DataTypeDotNet);
-				indexContent = Common.ReplaceExIgnoreCase(indexContent, ReplaceConsts.IndexKeyName, indexKey.KeyColumn.FieldNameSchema);
-				indexContent = Common.ReplaceExIgnoreCase(indexContent, ReplaceConsts.IndexKeyNameDb, indexKey.KeyColumn.FieldNameDb);
-				indexContent = Common.ReplaceExIgnoreCase(indexContent, ReplaceConsts.IndexName, indexKey.KeyName);
+                // ===================================
+                indexContent = Common.ReplaceExIgnoreCase(indexContent, ReplaceConsts.IndexKeyDbType, indexKey.Keys[0].KeyColumn.DataTypeDb);
+                indexContent = Common.ReplaceExIgnoreCase(indexContent, ReplaceConsts.IndexKeyDbTypeSize, FieldType_ColumnDataTypeSize(indexKey.Keys[0].KeyColumn));
+                indexContent = Common.ReplaceExIgnoreCase(indexContent, ReplaceConsts.IndexKeyDataType, indexKey.Keys[0].KeyColumn.DataTypeDotNet);
+                indexContent = Common.ReplaceExIgnoreCase(indexContent, ReplaceConsts.IndexKeyName, indexKey.GetIndexKeyName());
+                indexContent = Common.ReplaceExIgnoreCase(indexContent, ReplaceConsts.IndexKeyNameDb, indexKey.Keys[0].KeyColumn.FieldNameDb);
+                indexContent = Common.ReplaceExIgnoreCase(indexContent, ReplaceConsts.IndexName, indexKey.IndexName);
+                indexContent = Common.ReplaceExIgnoreCase(indexContent, ReplaceConsts.IndexKeyParameterList, indexKey.GetParameterList());
+                indexContent = Common.ReplaceExIgnoreCase(indexContent, ReplaceConsts.IndexKeyParameterAssignments, indexKey.GetParameterAssignments());
+                indexContent = Common.ReplaceExIgnoreCase(indexContent, ReplaceConsts.IndexKeyMatchClause, indexKey.GetMatchClause());
 
-				// add it to the result
-				result += ReplaceConsts.NewLine + indexContent;
+                // add it to the result
+                result += ReplaceConsts.NewLine + indexContent;
 			}
 
 			return result;

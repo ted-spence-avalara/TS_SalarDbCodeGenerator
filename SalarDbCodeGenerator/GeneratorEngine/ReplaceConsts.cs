@@ -74,9 +74,12 @@ namespace SalarDbCodeGenerator.GeneratorEngine
 		public const string IndexKeyName = "[:IndexKeyName:]";
 		public const string IndexKeyNameDb = "[:IndexKeyNameDb:]";
 		public const string IndexName = "[:IndexName:]";
+        public const string IndexKeyParameterList = "[:IndexKeyParameterList:]";
+        public const string IndexKeyParameterAssignments = "[:IndexKeyParameterAssignments:]";
+        public const string IndexKeyMatchClause = "[:IndexKeyMatchClause:]";
 
-		// Project
-		public const string ProjectItemPath = "[:ProjectItemPath:]";
+        // Project
+        public const string ProjectItemPath = "[:ProjectItemPath:]";
 		public const string ProjectName = "[:ProjectName:]";
 		public const string ProjectReference = "[:ProjectReference:]";
 

@@ -26,7 +26,7 @@ namespace SalarDbCodeGenerator.Schema.Database
 		public TableTypeInfo TableType { get; set; }
 		public List<DbColumn> SchemaColumns { get; private set; }
 		public List<DbForeignKey> ForeignKeys { get; private set; }
-		public List<DbConstraintKey> ConstraintKeys { get; private set; }
+		public List<DbIndex> Indexes { get; private set; }
 		public string OwnerName { get; set; }
 
 		public string TableNameSchema { get; set; }
@@ -64,37 +64,12 @@ namespace SalarDbCodeGenerator.Schema.Database
 		#endregion
 
 		#region public methods
-		public DbTable(string tableName)
+		public DbTable(string tableName, List<DbColumn> schemaColumns = null, List<DbForeignKey> foreignKeys = null, List<DbIndex> constraintKeys = null)
 		{
 			TableName = tableName;
-			SchemaColumns = new List<DbColumn>();
-			ForeignKeys = new List<DbForeignKey>();
-			ConstraintKeys = new List<DbConstraintKey>();
-			TableType = TableTypeInfo.Table;
-		}
-		public DbTable(string tableName, List<DbColumn> schemaColumns)
-		{
-			TableName = tableName;
-			SchemaColumns = schemaColumns;
-			ForeignKeys = new List<DbForeignKey>();
-			ConstraintKeys = new List<DbConstraintKey>();
-			TableType = TableTypeInfo.Table;
-		}
-		public DbTable(string tableName, List<DbColumn> schemaColumns, List<DbForeignKey> foreignKeys)
-		{
-			TableName = tableName;
-			SchemaColumns = schemaColumns;
-			ForeignKeys = foreignKeys;
-			ConstraintKeys = new List<DbConstraintKey>();
-			TableType = TableTypeInfo.Table;
-		}
-
-		public DbTable(string tableName, List<DbColumn> schemaColumns, List<DbForeignKey> foreignKeys, List<DbConstraintKey> constraintKeys)
-		{
-			TableName = tableName;
-			SchemaColumns = schemaColumns;
-			ForeignKeys = foreignKeys;
-			ConstraintKeys = constraintKeys;
+            SchemaColumns = schemaColumns ?? new List<DbColumn>();
+			ForeignKeys = foreignKeys ?? new List<DbForeignKey>();
+			Indexes = constraintKeys ?? new List<DbIndex>();
 			TableType = TableTypeInfo.Table;
 		}
 

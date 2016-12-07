@@ -164,13 +164,13 @@ namespace SalarDbCodeGenerator.Schema.Patterns
 		/// </summary>
 		public static class TableIndexConstraint
 		{
-			public const string NormalKey = "NormalKey";
-		}
+            public const string NormalKey = "NormalKey";
+        }
 
-		/// <summary>
-		/// NormalKey
-		/// </summary>
-		public static class TableUniqueConstraint
+        /// <summary>
+        /// NormalKey
+        /// </summary>
+        public static class TableUniqueConstraint
 		{
 			public const string NormalKey = "NormalKey";
 		}

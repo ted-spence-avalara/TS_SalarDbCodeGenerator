@@ -623,125 +623,121 @@ namespace SalarDbCodeGenerator.Schema.DbSchemaReaders
 		/// </summary>
 		private void ApplyTablesConstraintKeys(List<DbTable> tables, SQLServerVersions sqlVersion)
 		{
-			if (sqlVersion == SQLServerVersions.SQL2000 ||
-				sqlVersion == SQLServerVersions.SQL2000Below)
-			{
-				// not supported
-				return;
+            // Fail early for versions we don't support
+			if (sqlVersion == SQLServerVersions.SQL2000 || sqlVersion == SQLServerVersions.SQL2000Below) return;
+
+            // Identify indexes and all indexed columns
+			string constraintKeySql = @"
+-- First query - identify all the indexes in the database
+SELECT o.name AS TableName
+	 , i.index_id
+     , i.object_id
+	 , i.name AS IndexName
+	 , i.is_unique AS IsUnique
+	 , i.is_primary_key AS IsPrimaryKey
+	 , i.ignore_dup_key AS IgnoreDuplicateKey
+	 , i.is_unique_constraint AS IsUniqueConstraintKey
+	 , i.is_disabled AS Disabled
+  FROM sys.objects o
+       INNER JOIN sys.indexes i ON i.object_id = o.object_id
+ WHERE o.is_ms_shipped = 0 
+   AND o.type = 'U'
+       order by i.name;
+
+-- Second query - identify all columns for these indexes
+SELECT i.index_id
+     , i.object_id
+     , c.name as ColumnName
+     , ic.*
+  FROM sys.indexes i
+	   INNER JOIN sys.index_columns ic ON ic.object_id = i.object_id and ic.index_id = i.index_id
+	   INNER JOIN sys.columns c ON c.object_id = i.object_id AND c.column_id = ic.column_id 
+       order by i.name;
+";
+
+            // Load from the database
+            DataSet ds = new DataSet();
+            using (SqlDataAdapter adapter = new SqlDataAdapter(constraintKeySql, _dbConnection)) {
+                adapter.MissingSchemaAction = MissingSchemaAction.AddWithKey;
+                adapter.Fill(ds);
+            }
+
+            // Okay, now let's look through all the indexes we found
+            foreach (DataRow row in ds.Tables[0].Rows) {
+
+                // Find the matching table
+                var table = (from t in tables where String.Equals(t.TableName, row["TableName"].ToString()) select t).FirstOrDefault();
+                if (table == null) continue;
+
+                // What information do we have about this index?
+                var IsUnique = Convert.ToBoolean(row["IsUnique"].ToString());
+                var IndexName = row["IndexName"].ToString();
+                var IndexId = (int)row["index_id"];
+                var ObjectId = (int)row["object_id"];
+                var IsPrimaryKey = Convert.ToBoolean(row["IsPrimaryKey"].ToString());
+
+                // Convert all columns to constraint keys
+                var columns = (from DataRow r2
+                                 in ds.Tables[1].Rows
+                              where (int)r2["index_id"] == IndexId
+                                 && (int)r2["object_id"] == ObjectId
+                             select new DbConstraintKey()
+                                    {
+                                       KeyColumnName = r2["ColumnName"].ToString(),
+                                       KeyColumn = table.FindColumnDb(r2["ColumnName"].ToString()),
+                                    }).ToList();
+
+                // Add either a simple or a complex key
+                if (columns.Any()) {
+                    table.Indexes.Add(new DbIndex()
+                    {
+                        Keys = columns,
+                        IsUnique = IsUnique,
+                        IndexName = IndexName,
+                        IsPrimaryKey = IsPrimaryKey
+                    });
+                }
 			}
 
-			//// Table constraints for SQL Server 2005 and above
-			//SELECT        sys.objects.name AS TableName, sys.columns.name AS ColumnName, sys.indexes.name AS IndexName, sys.indexes.is_unique AS IsUnique, 
-			//                sys.indexes.is_primary_key AS IsPrimaryKey, sys.indexes.ignore_dup_key AS IgnoreDuplicateKey, sys.indexes.is_unique_constraint AS IsUniqueConstraintKey, 
-			//                sys.indexes.is_disabled AS Disabled
-			//FROM            sys.objects INNER JOIN
-			//                sys.indexes INNER JOIN
-			//                sys.index_columns INNER JOIN
-			//                sys.columns ON sys.index_columns.object_id = sys.columns.object_id AND sys.index_columns.column_id = sys.columns.column_id ON 
-			//                sys.indexes.object_id = sys.index_columns.object_id AND sys.indexes.index_id = sys.index_columns.index_id ON 
-			//                sys.objects.object_id = sys.index_columns.object_id
-			//WHERE        (sys.objects.is_ms_shipped = 0) AND (sys.objects.type = 'U')
+            // Finally - scan through each table that doesn't have a primary key and see if we can find one
+            //foreach (var table in tables) {
+            //    if (!table.HasPrimaryKey()) {
 
-			string constraintKeySql = "SELECT        sys.objects.name AS TableName, sys.columns.name AS ColumnName, sys.indexes.name AS IndexName, sys.indexes.is_unique AS IsUnique, " +
-					"                sys.indexes.is_primary_key AS IsPrimaryKey, sys.indexes.ignore_dup_key AS IgnoreDuplicateKey, sys.indexes.is_unique_constraint AS IsUniqueConstraintKey,  " +
-					"                sys.indexes.is_disabled AS Disabled " +
-					"	FROM            sys.objects INNER JOIN " +
-					"                sys.indexes INNER JOIN " +
-					"                sys.index_columns INNER JOIN " +
-					"                sys.columns ON sys.index_columns.object_id = sys.columns.object_id AND sys.index_columns.column_id = sys.columns.column_id ON  " +
-					"                sys.indexes.object_id = sys.index_columns.object_id AND sys.indexes.index_id = sys.index_columns.index_id ON  " +
-					"                sys.objects.object_id = sys.index_columns.object_id " +
-					"	WHERE        (sys.objects.is_ms_shipped = 0) AND (sys.objects.type = 'U') ";
+            //        // We don't currently have a primary key, let's see if we can find one
+            //        System.Diagnostics.Debug.WriteLine("Table " + table.TableName + " does not have a primary key - checking indexes");
+            //        var found = (from DataRow dr in ds.Tables[1].Rows where dr["TableName"] == table.TableName && dr["IsPrimaryKey
 
-			using (SqlDataAdapter adapter = new SqlDataAdapter(constraintKeySql, _dbConnection))
-			{
-				adapter.MissingSchemaAction = MissingSchemaAction.AddWithKey;
+            //        keysData.DefaultView.RowFilter = " TableName='" + table.TableName + "' AND IsPrimaryKey=1 ";
+            //        DataRowView myrow = null;
+            //        foreach (DataRowView keysDataRow in keysData.DefaultView) {
+            //            System.Diagnostics.Debug.WriteLine("Table " + table.TableName + " should have a PK, it's named " + keysDataRow["ColumnName"].ToString());
+            //            if (myrow != null) {
+            //                System.Diagnostics.Debug.WriteLine("Tables with a dual primary key are not supported.");
+            //                myrow = null;
+            //                break;
+            //            }
+            //            myrow = keysDataRow;
+            //        }
 
-				// description data table
-				using (DataTable keysData = new DataTable())
-				{
-					// Just to avoid stupid "Failed to enable constraints" error!
-					using (DataSet tempDs = new DataSet())
-					{
-						// Avoiding stupid "Failed to enable constraints" error!
-						tempDs.EnforceConstraints = false;
-						tempDs.Tables.Add(keysData);
+            //        // If we found one single primary key through this means, use it
+            //        if (myrow != null) {
+            //            foreach (var column in table.SchemaColumns) {
+            //                if (String.Equals(column.FieldNameDb, myrow["ColumnName"].ToString(), StringComparison.CurrentCultureIgnoreCase)
+            //                    && column.DataTypeDotNet != "System.DateTime") {
+            //                    System.Diagnostics.Debug.WriteLine("Matched row " + column.FieldNameDb + " and was able to assign a primary key.");
+            //                    column.PrimaryKey = true;
+            //                    break;
+            //                }
+            //            }
+            //        }
+            //    }
+            //}
+        }
 
-						// Get from db
-						adapter.Fill(keysData);
-					}
-
-					if (keysData.Rows.Count > 0)
-					{
-						// find description if there is any
-						foreach (var table in tables)
-						{
-							// filter row
-							keysData.DefaultView.RowFilter = " TableName='" + table.TableName + "' AND IsPrimaryKey=0 ";
-
-							// fetch findings, if there is any
-							foreach (DataRowView keysDataRow in keysData.DefaultView)
-							{
-								// table found  !
-								DataRow keyRow = keysDataRow.Row;
-
-								// constraint Key
-								var constraintKey = new DbConstraintKey()
-								{
-									IsUnique = Convert.ToBoolean(keyRow["IsUnique"].ToString()),
-									KeyColumnName = keyRow["ColumnName"].ToString(),
-									KeyName = keyRow["IndexName"].ToString()
-								};
-
-								// constraint keys
-								table.ConstraintKeys.Add(constraintKey);
-
-								// find key column
-								DbColumn keyColumn = table.FindColumnDb(constraintKey.KeyColumnName);
-								constraintKey.KeyColumn = keyColumn;
-							}
-
-                            // If we don't currently have a primary key on this table, let's see if we find one in these constraints
-                            if (!table.HasPrimaryKey()) {
-                                System.Diagnostics.Debug.WriteLine("Table " + table.TableName + " does not have a primary key - checking indexes");
-                                keysData.DefaultView.RowFilter = " TableName='" + table.TableName + "' AND IsPrimaryKey=1 ";
-                                DataRowView myrow = null;
-                                foreach (DataRowView keysDataRow in keysData.DefaultView)
-                                {
-                                    System.Diagnostics.Debug.WriteLine("Table " + table.TableName + " should have a PK, it's named " + keysDataRow["ColumnName"].ToString());
-                                    if (myrow != null)
-                                    {
-                                        System.Diagnostics.Debug.WriteLine("Tables with a dual primary key are not supported.");
-                                        myrow = null;
-                                        break;
-                                    }
-                                    myrow = keysDataRow;
-                                }
-
-                                // If we found one single primary key through this means, use it
-                                if (myrow != null) { 
-                                    foreach (var column in table.SchemaColumns)
-                                    {
-                                        if (String.Equals(column.FieldNameDb, myrow["ColumnName"].ToString(), StringComparison.CurrentCultureIgnoreCase)
-                                            && column.DataTypeDotNet != "System.DateTime")
-                                        {
-                                            System.Diagnostics.Debug.WriteLine("Matched row " + column.FieldNameDb + " and was able to assign a primary key.");
-                                            column.PrimaryKey = true;
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-						}
-					}
-				}
-			}
-		}
-
-		/// <summary>
-		/// Detecting one-to-one relation
-		/// </summary>
-		private void ApplyDetectedOneToOneRelation(List<DbTable> tables)
+        /// <summary>
+        /// Detecting one-to-one relation
+        /// </summary>
+        private void ApplyDetectedOneToOneRelation(List<DbTable> tables)
 		{
 			foreach (var table in tables)
 				foreach (var fkey in table.ForeignKeys)
@@ -763,7 +759,7 @@ namespace SalarDbCodeGenerator.Schema.DbSchemaReaders
 						foreignIsUnique = true;
 					else
 					{
-						var fkeyC = table.ConstraintKeys.FirstOrDefault(x => x.KeyColumnName == fkey.ForeignColumnName);
+						var fkeyC = table.Indexes.FirstOrDefault(x => ((x.Keys.Count == 1) && (x.Keys[0].KeyColumnName == fkey.ForeignColumnName)));
 						if (fkeyC != null)
 						{
 							if (fkeyC.IsUnique)
@@ -775,7 +771,7 @@ namespace SalarDbCodeGenerator.Schema.DbSchemaReaders
 						localIsUnique = true;
 					else
 					{
-						var lkeyC = table.ConstraintKeys.FirstOrDefault(x => x.KeyColumnName == fkey.LocalColumnName);
+						var lkeyC = table.Indexes.FirstOrDefault(x => ((x.Keys.Count == 1) && (x.Keys[0].KeyColumnName == fkey.LocalColumnName)));
 						if (lkeyC != null)
 						{
 							if (lkeyC.IsUnique)
@@ -800,7 +796,7 @@ namespace SalarDbCodeGenerator.Schema.DbSchemaReaders
 			// look in tables list
 			foreach (DbTable table in result)
 			{
-				if (table.ConstraintKeys.Count == 0)
+				if (table.Indexes.Count == 0)
 				{
 					continue;
 				}
@@ -808,68 +804,68 @@ namespace SalarDbCodeGenerator.Schema.DbSchemaReaders
 				StringCollection duplicateConstraints = new StringCollection();
 
 				// looping the contraints keys
-				for (int j = table.ConstraintKeys.Count - 1; j >= 0; j--)
+				for (int j = table.Indexes.Count - 1; j >= 0; j--)
 				{
-					var constraintKey = table.ConstraintKeys[j];
+					var thisIndex = table.Indexes[j];
 
 					// no primary keys are allowed
-					if (constraintKey.KeyColumn != null && constraintKey.KeyColumn.PrimaryKey)
+					if (thisIndex.Keys.Count > 0 && thisIndex.IsPrimaryKey)
 					{
 						// There is no need in keeping the primary key
-						table.ConstraintKeys.RemoveAt(j);
+						table.Indexes.RemoveAt(j);
 						continue;
 					}
 
-					// first look in the foreign keys!
-					int index = table.ForeignKeys.FindIndex(x =>
-						x.LocalColumnName == constraintKey.KeyColumnName);
+                    // If this is a single column index, first look in the foreign keys!
+                    if (thisIndex.Keys.Count == 1) {
+                        int index = table.ForeignKeys.FindIndex(x => x.LocalColumnName == thisIndex.Keys[0].KeyColumnName);
 
-					if (index != -1)
-					{
-						// this is a foreign key and should not be here
-						table.ConstraintKeys.RemoveAt(j);
-						continue;
-					}
+                        // this is a foreign key and should not be here
+                        if (index != -1) {
+                            table.Indexes.RemoveAt(j);
+                            continue;
+                        }
+                    }
 
-					// if this is not a unique key
-					// seach for a unique one if it is there
-					if (constraintKey.IsUnique == false)
-					{
-						index = table.ConstraintKeys.FindIndex(x =>
-							x.KeyColumnName == constraintKey.KeyColumnName
-							&& x.IsUnique == true);
+					//// if this is not a unique key
+					//// seach for a unique one if it is there
+					//if (thisIndex.IsUnique == false)
+					//{
+					//	index = table.Indexes.FindIndex(x =>
+					//		x.KeyColumnName == thisIndex.KeyColumnName
+					//		&& x.IsUnique == true);
 
-						if (index != -1)
-						{
-							// the same and the Unique key is already there!
-							table.ConstraintKeys.RemoveAt(j);
-							continue;
-						}
-					}
-					else
-					{
-						var notUniqueKeys = table.ConstraintKeys.FindAll(x =>
-							x.KeyColumnName == constraintKey.KeyColumnName
-							&& x.IsUnique == false);
+					//	if (index != -1)
+					//	{
+					//		// the same and the Unique key is already there!
+					//		table.Indexes.RemoveAt(j);
+					//		continue;
+					//	}
+					//}
+					//else
+					//{
+					//	var notUniqueKeys = table.Indexes.FindAll(x =>
+					//		x.KeyColumnName == thisIndex.KeyColumnName
+					//		&& x.IsUnique == false);
 
-						if (notUniqueKeys != null && notUniqueKeys.Count > 0)
-						{
-							// remove them
-							notUniqueKeys.ForEach(x => table.ConstraintKeys.Remove(x));
-							continue;
-						}
-					}
+					//	if (notUniqueKeys != null && notUniqueKeys.Count > 0)
+					//	{
+					//		// remove them
+					//		notUniqueKeys.ForEach(x => table.Indexes.Remove(x));
+					//		continue;
+					//	}
+					//}
 
-					// look for duplication constraint key
-					if (duplicateConstraints.Contains(constraintKey.KeyColumnName))
-					{
-						// the column with index is already there
-						table.ConstraintKeys.RemoveAt(j);
-						continue;
-					}
+					//// look for duplication constraint key
+					//if (duplicateConstraints.Contains(thisIndex.KeyColumnName))
+					//{
+					//	// the column with index is already there
+					//	table.Indexes.RemoveAt(j);
+					//	continue;
+					//}
 
-					// all to the constraint key list
-					duplicateConstraints.Add(constraintKey.KeyColumnName);
+					//// all to the constraint key list
+					//duplicateConstraints.Add(thisIndex.KeyColumnName);
 				}
 			}
 		}
