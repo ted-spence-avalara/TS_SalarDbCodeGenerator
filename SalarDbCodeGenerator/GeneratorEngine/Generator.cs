@@ -1327,7 +1327,7 @@ namespace SalarDbCodeGenerator.GeneratorEngine
                 indexContent = Common.ReplaceExIgnoreCase(indexContent, ReplaceConsts.IndexKeyDbType, indexKey.Keys[0].KeyColumn.DataTypeDb);
                 indexContent = Common.ReplaceExIgnoreCase(indexContent, ReplaceConsts.IndexKeyDbTypeSize, FieldType_ColumnDataTypeSize(indexKey.Keys[0].KeyColumn));
                 indexContent = Common.ReplaceExIgnoreCase(indexContent, ReplaceConsts.IndexKeyDataType, indexKey.Keys[0].KeyColumn.DataTypeDotNet);
-                indexContent = Common.ReplaceExIgnoreCase(indexContent, ReplaceConsts.IndexKeyName, indexKey.GetIndexKeyName());
+                indexContent = Common.ReplaceExIgnoreCase(indexContent, ReplaceConsts.IndexKeyName, indexKey.GetIndexKeyName(table));
                 indexContent = Common.ReplaceExIgnoreCase(indexContent, ReplaceConsts.IndexKeyNameDb, indexKey.Keys[0].KeyColumn.FieldNameDb);
                 indexContent = Common.ReplaceExIgnoreCase(indexContent, ReplaceConsts.IndexName, indexKey.IndexName);
                 indexContent = Common.ReplaceExIgnoreCase(indexContent, ReplaceConsts.IndexKeyParameterList, indexKey.GetParameterList());

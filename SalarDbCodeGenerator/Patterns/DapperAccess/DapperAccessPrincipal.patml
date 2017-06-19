@@ -125,10 +125,10 @@ namespace [:Namespace:].Entities
         /// </summary>
         public IEnumerable<[:TableName:]> GetBy[:IndexKeyName:]Index([:IndexKeyParameterList:])
         {
-            return Query<[:TableName:]>(SqlGetBy[:IndexKeyName:]Command, new { [:IndexKeyParameterAssignments:] });
+            return Query<[:TableName:]>(SqlGetBy[:IndexKeyName:]IndexCommand, new { [:IndexKeyParameterAssignments:] });
         }
 
-        public const string SqlGetBy[:IndexKeyName:]Command = "SELECT * FROM [:TableOwnerNameAsPrefix:][:TableNameDb:] WITH (nolock) WHERE [:IndexKeyMatchClause:]";
+        public const string SqlGetBy[:IndexKeyName:]IndexCommand = "SELECT * FROM [:TableOwnerNameAsPrefix:][:TableNameDb:] WITH (nolock) WHERE [:IndexKeyMatchClause:]";
 ]]>
                 </Condition>
             </PatternContent>

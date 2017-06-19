@@ -53,7 +53,7 @@ namespace SalarDbCodeGenerator.Schema.Database
 
         private static List<string> _existingKeyNames = new List<string>();
         private string _indexKeyName = null;
-        public string GetIndexKeyName()
+        public string GetIndexKeyName(DbTable table)
         {
             if (_indexKeyName == null) {
 
@@ -66,11 +66,11 @@ namespace SalarDbCodeGenerator.Schema.Database
 
                 // See if we need to uniqueify it
                 int id = 1;
-                if (_existingKeyNames.Contains(_indexKeyName)) {
+                if (_existingKeyNames.Contains(table.TableName + "|" + _indexKeyName)) {
                     id++;
                     _indexKeyName = sb.ToString() + id.ToString();
                 }
-                _existingKeyNames.Add(_indexKeyName);
+                _existingKeyNames.Add(table.TableName + "|" + _indexKeyName);
             }
             return _indexKeyName;
         }
