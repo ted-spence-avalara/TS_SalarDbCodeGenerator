@@ -12,10 +12,9 @@
     <BaseContent>
         <![CDATA[using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Data.SqlClient;
 using System.Linq;
 using Avalara.SafeFetch.Base;
+using Dapper;
  
 /*
  * 
@@ -88,7 +87,7 @@ namespace [:Namespace:].Entities
         /// </summary>
         public IEnumerable<[:LocalTableName:]> GetBy[:LocalFieldName:]([:LocalFieldDotNetType:] [:LocalFieldName:])
         {
-            return Query<[:LocalTableName:]>(SqlGetBy[:LocalFieldName:]Command, new { [:LocalFieldName:] = [:LocalFieldName:] });
+            return Query<[:LocalTableName:]>(SqlGetBy[:LocalFieldName:]Command, new { [:LocalFieldName:] = [:LocalFieldNameParameter:] });
         }
         
         public const string SqlGetBy[:LocalFieldName:]Command = "SELECT * FROM [:TableOwnerNameAsPrefix:][:TableNameDb:] WITH (nolock) WHERE [:LocalFieldNameDb:]=[:ProviderSPParamPrefix:][:LocalFieldName:]";

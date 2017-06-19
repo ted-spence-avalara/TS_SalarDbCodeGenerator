@@ -1253,8 +1253,9 @@ namespace SalarDbCodeGenerator.GeneratorEngine
 			// ===================================
 			// local field
 			content = Common.ReplaceExIgnoreCase(content, ReplaceConsts.LocalFieldDataType, foreignKey.LocalColumn.DataTypeDotNet);
-			content = Common.ReplaceExIgnoreCase(content, ReplaceConsts.LocalFieldName, foreignKey.LocalColumn.FieldNameSchema);
-			content = Common.ReplaceExIgnoreCase(content, ReplaceConsts.LocalFieldNameDb, foreignKey.LocalColumn.FieldNameDb);
+            content = Common.ReplaceExIgnoreCase(content, ReplaceConsts.LocalFieldName, foreignKey.LocalColumn.FieldNameSchema);
+            content = Common.ReplaceExIgnoreCase(content, ReplaceConsts.LocalFieldNameParameter, FixupForUnicodeConversion(foreignKey.LocalColumn));
+            content = Common.ReplaceExIgnoreCase(content, ReplaceConsts.LocalFieldNameDb, foreignKey.LocalColumn.FieldNameDb);
 			// no oridianl, foreignContent = ReplaceExIgnoreCase(foreignContent, ReplaceConsts.LocalFieldOrdinalValue, foreignKey.LocalColumn.ColumnOrdinal.ToString());
 			// column description
 			content = Common.ReplaceExIgnoreCase(content, ReplaceConsts.LocalFieldDescription, foreignKey.LocalColumn.UserDescription);
@@ -1275,10 +1276,19 @@ namespace SalarDbCodeGenerator.GeneratorEngine
 			return content;
 		}
 
-		/// <summary>
-		/// Applies table index constraintsto pattern content replacement
-		/// </summary>
-		string Replacer_ConditionItem_AppliesToIndexConstraints(string content, DbTable table, bool uniqueKeys)
+        private string FixupForUnicodeConversion(DbColumn field)
+        {
+            if (String.Equals(field.DataTypeDb, "VARCHAR", StringComparison.OrdinalIgnoreCase)) {
+                return $"new DbString() {{ IsAnsi = true, Value = {field.FieldNameSchema} }}";
+            } else {
+                return field.FieldNameSchema;
+            }
+        }
+
+        /// <summary>
+        /// Applies table index constraintsto pattern content replacement
+        /// </summary>
+        string Replacer_ConditionItem_AppliesToIndexConstraints(string content, DbTable table, bool uniqueKeys)
 		{
 			// check if there is no constraints
 			if (table.Indexes.Count == 0)

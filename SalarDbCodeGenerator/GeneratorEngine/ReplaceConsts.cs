@@ -71,8 +71,8 @@ namespace SalarDbCodeGenerator.GeneratorEngine
 		public const string IndexKeyDbType = "[:IndexKeyDbType:]";
 		public const string IndexKeyDbTypeSize = "[:IndexKeyDbTypeSize:]";
 		public const string IndexKeyDataType = "[:IndexKeyDotNetType:]";
-		public const string IndexKeyName = "[:IndexKeyName:]";
-		public const string IndexKeyNameDb = "[:IndexKeyNameDb:]";
+        public const string IndexKeyName = "[:IndexKeyName:]";
+        public const string IndexKeyNameDb = "[:IndexKeyNameDb:]";
 		public const string IndexName = "[:IndexName:]";
         public const string IndexKeyParameterList = "[:IndexKeyParameterList:]";
         public const string IndexKeyParameterAssignments = "[:IndexKeyParameterAssignments:]";
@@ -106,8 +106,11 @@ namespace SalarDbCodeGenerator.GeneratorEngine
 		public const string LocalFieldDbType = "[:LocalFieldDbType:]";
 		public const string LocalFieldDbTypeSize = "[:LocalFieldDbTypeSize:]";
 		public const string LocalFieldDataType = "[:LocalFieldDotNetType:]";
-		public const string LocalFieldName = "[:LocalFieldName:]";
-		public const string LocalFieldNameDb = "[:LocalFieldNameDb:]";
+        public const string LocalFieldName = "[:LocalFieldName:]";
+
+        // Used for dapper parameter inserts
+        public const string LocalFieldNameParameter = "[:LocalFieldNameParameter:]";
+        public const string LocalFieldNameDb = "[:LocalFieldNameDb:]";
 		public const string LocalFieldDescription = "[:LocalFieldDescription:]";
 		// ForeignKeys - ForeignField
 		public const string ForeignFieldDbType = "[:ForeignFieldDbType:]";

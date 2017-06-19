@@ -51,13 +51,28 @@ namespace SalarDbCodeGenerator.Schema.Database
             return sb.ToString();
 		}
 
+        private static List<string> _existingKeyNames = new List<string>();
+        private string _indexKeyName = null;
         public string GetIndexKeyName()
         {
-            StringBuilder sb = new StringBuilder();
-            foreach (var key in Keys) {
-                sb.Append(key.KeyColumn.FieldNameSchema);
+            if (_indexKeyName == null) {
+
+                // Construct friendly key name
+                StringBuilder sb = new StringBuilder();
+                foreach (var key in Keys) {
+                    sb.Append(key.KeyColumn.FieldNameSchema);
+                }
+                _indexKeyName = sb.ToString();
+
+                // See if we need to uniqueify it
+                int id = 1;
+                if (_existingKeyNames.Contains(_indexKeyName)) {
+                    id++;
+                    _indexKeyName = sb.ToString() + id.ToString();
+                }
+                _existingKeyNames.Add(_indexKeyName);
             }
-            return sb.ToString();
+            return _indexKeyName;
         }
 
         public string GetParameterList()
