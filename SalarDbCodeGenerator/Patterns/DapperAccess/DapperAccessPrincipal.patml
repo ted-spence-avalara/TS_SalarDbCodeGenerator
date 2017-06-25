@@ -57,18 +57,18 @@ namespace [:Namespace:].Entities
             return "[:TableOwnerNameAsPrefix:][:TableNameDb:]";
         }
 
-        public IEnumerable<[:TableName:]> GetTop(int count)
+        public async Task<IEnumerable<[:TableName:]>> GetTop(int count)
         {
-            return Query<[:TableName:]>(SqlGetTopCommand, new { top = count });
+            return await QueryAsync<[:TableName:]>(SqlGetTopCommand, new { top = count }).ConfigureAwait(false);
         }
         
-        public IEnumerable<[:TableName:]> GetAll()
+        public async Task<IEnumerable<[:TableName:]>> GetAll()
         {
-            return Query<[:TableName:]>(SqlGetAllCommand);
+            return await QueryAsync<[:TableName:]>(SqlGetAllCommand).ConfigureAwait(false);
         }
         
-        public const string SqlGetTopCommand = "SELECT TOP (@top) * FROM [:TableOwnerNameAsPrefix:][:TableNameDb:] WITH (nolock)";
-        public const string SqlGetAllCommand = "SELECT * FROM [:TableOwnerNameAsPrefix:][:TableNameDb:] WITH (nolock)";
+        protected const string SqlGetTopCommand = "SELECT TOP (@top) * FROM [:TableOwnerNameAsPrefix:][:TableNameDb:] WITH (nolock)";
+        protected const string SqlGetAllCommand = "SELECT * FROM [:TableOwnerNameAsPrefix:][:TableNameDb:] WITH (nolock)";
         
 [#UpdatableTable#]
 [#ForeignKeys#]
@@ -85,12 +85,12 @@ namespace [:Namespace:].Entities
         /// <summary>
         /// Foreign key multiplicity-one pattern
         /// </summary>
-        public IEnumerable<[:LocalTableName:]> GetBy[:LocalFieldName:]([:LocalFieldDotNetType:] [:LocalFieldName:])
+        public async Task<IEnumerable<[:LocalTableName:]> GetBy[:LocalFieldName:]([:LocalFieldDotNetType:] [:LocalFieldName:])
         {
-            return Query<[:LocalTableName:]>(SqlGetBy[:LocalFieldName:]Command, new { [:LocalFieldName:] = [:LocalFieldNameParameter:] });
+            return await QueryAsync<[:LocalTableName:]>(SqlGetBy[:LocalFieldName:]Command, new { [:LocalFieldName:] = [:LocalFieldNameParameter:] }).ConfigureAwait(false);
         }
         
-        public const string SqlGetBy[:LocalFieldName:]Command = "SELECT * FROM [:TableOwnerNameAsPrefix:][:TableNameDb:] WITH (nolock) WHERE [:LocalFieldNameDb:]=[:ProviderSPParamPrefix:][:LocalFieldName:]";
+        protected const string SqlGetBy[:LocalFieldName:]Command = "SELECT * FROM [:TableOwnerNameAsPrefix:][:TableNameDb:] WITH (nolock) WHERE [:LocalFieldNameDb:]=[:ProviderSPParamPrefix:][:LocalFieldName:]";
         ]]>
                 </Condition>
                 <Condition Key="MultiplicityMany">
@@ -107,12 +107,12 @@ namespace [:Namespace:].Entities
         /// <summary>
         /// Index [:IndexName:] pattern
         /// </summary>
-        public IEnumerable<[:TableName:]> GetBy[:IndexKeyName:]Index([:IndexKeyParameterList:])
+        public async Task<IEnumerable<[:TableName:]> GetBy[:IndexKeyName:]Index([:IndexKeyParameterList:])
         {
-            return Query<[:TableName:]>(SqlGetBy[:IndexKeyName:]Command, new { [:IndexKeyParameterAssignments:] });
+            return await QueryAsync<[:TableName:]>(SqlGetBy[:IndexKeyName:]Command, new { [:IndexKeyParameterAssignments:] }).ConfigureAwait(false);
         }
 
-        public const string SqlGetBy[:IndexKeyName:]Command = "SELECT * FROM [:TableOwnerNameAsPrefix:][:TableNameDb:] WITH (nolock) WHERE [:IndexKeyMatchClause:]";
+        protected const string SqlGetBy[:IndexKeyName:]Command = "SELECT * FROM [:TableOwnerNameAsPrefix:][:TableNameDb:] WITH (nolock) WHERE [:IndexKeyMatchClause:]";
 ]]>
                 </Condition>
             </PatternContent>
@@ -123,12 +123,12 @@ namespace [:Namespace:].Entities
         /// <summary>
         /// Unique constraint [:IndexName:] pattern
         /// </summary>
-        public IEnumerable<[:TableName:]> GetBy[:IndexKeyName:]Index([:IndexKeyParameterList:])
+        public async Task<IEnumerable<[:TableName:]> GetBy[:IndexKeyName:]Index([:IndexKeyParameterList:])
         {
-            return Query<[:TableName:]>(SqlGetBy[:IndexKeyName:]IndexCommand, new { [:IndexKeyParameterAssignments:] });
+            return await QueryAsync<[:TableName:]>(SqlGetBy[:IndexKeyName:]IndexCommand, new { [:IndexKeyParameterAssignments:] }).ConfigureAwait(false);
         }
 
-        public const string SqlGetBy[:IndexKeyName:]IndexCommand = "SELECT * FROM [:TableOwnerNameAsPrefix:][:TableNameDb:] WITH (nolock) WHERE [:IndexKeyMatchClause:]";
+        protected const string SqlGetBy[:IndexKeyName:]IndexCommand = "SELECT * FROM [:TableOwnerNameAsPrefix:][:TableNameDb:] WITH (nolock) WHERE [:IndexKeyMatchClause:]";
 ]]>
                 </Condition>
             </PatternContent>
@@ -149,16 +149,16 @@ namespace [:Namespace:].Entities
                 <Condition Key="ReadOnlyTable"></Condition>
                 <Condition Key="NoPrimaryKey">
                     <![CDATA[
-        public void Insert([:TableName:] model, int userid)
+        public async Task Insert([:TableName:] model, int userid)
         {
             [#SetCreatedFields#]
-            Execute(SqlInsertCommand, model);
+            await ExecuteAsync(SqlInsertCommand, model).ConfigureAwait(false);
         }
 
-        public void Insert(IEnumerable<[:TableName:]> models, int userid)
+        public async Task Insert(IEnumerable<[:TableName:]> models, int userid)
         {
             foreach (var obj in models) {
-                Insert(obj, userid);
+                await Insert(obj, userid).ConfigureAwait(false);
             }
         }
         
@@ -175,15 +175,15 @@ namespace [:Namespace:].Entities
                 <Condition Key="WithPrimaryKey">
                     <![CDATA[
 [#GetPrimaryKey#]
-        public void Insert([:TableName:] model, int userid)
+        public async Task Insert([:TableName:] model, int userid)
         {
-            InsertWithId(model, userid);
+            await InsertWithId(model, userid).ConfigureAwait(false);
         }
 
-        public void Insert(IEnumerable<[:TableName:]> models, int userid)
+        public async Task Insert(IEnumerable<[:TableName:]> models, int userid)
         {
             foreach (var obj in models) {
-                InsertWithId(obj, userid);
+                await InsertWithId(obj, userid).ConfigureAwait(false);
             }
         }
 
@@ -191,38 +191,38 @@ namespace [:Namespace:].Entities
         /// Insert this record and return the [:PrimaryKeyName:] from OUTPUT inserted.
         /// </summary>
         /// <returns>[:PrimaryKeyName:] from OUTPUT inserted.</returns>
-        public [:PrimaryKeyDotNetType:] InsertWithId([:TableName:] model, int userid)
+        public async Task<[:PrimaryKeyDotNetType:]> InsertWithId([:TableName:] model, int userid)
         {
             [#SetCreatedFields#]
-            var result = Query<[:PrimaryKeyDotNetType:]>(SqlInsertWithIdCommand, model);
+            var result = await QueryAsync<[:PrimaryKeyDotNetType:]>(SqlInsertWithIdCommand, model).ConfigureAwait(false);
             model.[:PrimaryKeyName:] = ([:PrimaryKeyDotNetType:])result.FirstOrDefault();
             return model.[:PrimaryKeyName:];
         }
         
-        public void InsertWithId(IEnumerable<[:TableName:]> models, int userid)
+        public async Task InsertWithId(IEnumerable<[:TableName:]> models, int userid)
         {
             foreach (var obj in models) {
-                InsertWithId(obj, userid);
+                await InsertWithId(obj, userid).ConfigureAwait(false);
             }
         }
         
-        public void Delete([#PrimaryKeyListAsArguments#])
+        public async Task Delete([#PrimaryKeyListAsArguments#])
         {
-            long rows_affected = Query<long>(SqlDeleteCommand, new { [#PrimaryKeyListAsCodeProps#] }).FirstOrDefault();
+            long rows_affected = await QueryAsync<long>(SqlDeleteCommand, new { [#PrimaryKeyListAsCodeProps#] }).ConfigureAwait(false).FirstOrDefault();
             if (rows_affected != 1) throw new Exception("Delete [:TableName:]: Item not found");
         }
 
-        public void Update([:TableName:] model, int userid)
+        public async Task Update([:TableName:] model, int userid)
         {
             [#SetModifiedFields#]
-            long rows_affected = Query<long>(SqlUpdateCommand, model).FirstOrDefault();
+            long rows_affected = await QueryAsync<long>(SqlUpdateCommand, model).ConfigureAwait(false).FirstOrDefault();
             if (rows_affected != 1) throw new Exception("Update [:TableName:]: Item not found");
         }
 
-        public void Update(IEnumerable<[:TableName:]> models, int userid)
+        public async Task Update(IEnumerable<[:TableName:]> models, int userid)
         {
             foreach (var obj in models) {
-                Update(obj, userid);
+                await Update(obj, userid).ConfigureAwait(false);
             }
         }
         
@@ -274,17 +274,17 @@ namespace [:Namespace:].Entities
         /// <summary>
         /// One to One primary key pattern
         /// </summary>
-        public [:TableName:] GetByPrimaryKey([:FieldDotNetType:] id)
+        public async Task<[:TableName:]> GetByPrimaryKey([:FieldDotNetType:] id)
         {
-            return GetBy[:FieldName:](id);
+            return await GetBy[:FieldName:](id).ConfigureAwait(false);
         }
         
-        public [:TableName:] GetBy[:FieldName:]([:FieldDotNetType:] [:FieldName:])
+        public async Task<[:TableName:]> GetBy[:FieldName:]([:FieldDotNetType:] [:FieldName:])
         {
-            return Query<[:TableName:]>(SqlGetBy[:FieldName:]Command, new { [:FieldName:] = [:FieldName:] }).FirstOrDefault();
+            return await QueryAsync<[:TableName:]>(SqlGetBy[:FieldName:]Command, new { [:FieldName:] = [:FieldName:] }).ConfigureAwait(false).FirstOrDefault();
         }
         
-        public const string SqlGetBy[:FieldName:]Command = "SELECT * FROM [:TableOwnerNameAsPrefix:][:TableNameDb:] WITH (nolock) WHERE [:FieldNameDbEscaped:]=[:ProviderSPParamPrefix:][:FieldName:]";
+        protected const string SqlGetBy[:FieldName:]Command = "SELECT * FROM [:TableOwnerNameAsPrefix:][:TableNameDb:] WITH (nolock) WHERE [:FieldNameDbEscaped:]=[:ProviderSPParamPrefix:][:FieldName:]";
 ]]>
                         </Condition>
                         <Condition Key="OneToOneForeignKey">
@@ -292,17 +292,17 @@ namespace [:Namespace:].Entities
         /// <summary>
         /// One to One foreign key pattern
         /// </summary>
-        public [:TableName:] GetByPrimaryKey([:FieldDotNetType:] id)
+        public async Task<[:TableName:]> GetByPrimaryKey([:FieldDotNetType:] id)
         {
-            return GetBy[:FieldName:](id);
+            return await GetBy[:FieldName:](id).ConfigureAwait(false);
         }
         
-        public [:TableName:] GetBy[:FieldName:]([:FieldDotNetType:] [:FieldName:])
+        public async Task<[:TableName:]> GetBy[:FieldName:]([:FieldDotNetType:] [:FieldName:])
         {
-            return Query<[:TableName:]>(SqlGetBy[:FieldName:]Command, new { [:FieldName:] = [:FieldName:] }).FirstOrDefault();
+            return await QueryAsync<[:TableName:]>(SqlGetBy[:FieldName:]Command, new { [:FieldName:] = [:FieldName:] }).ConfigureAwait(false).FirstOrDefault();
         }
         
-        public const string SqlGetBy[:FieldName:]Command = "SELECT * FROM [:TableOwnerNameAsPrefix:][:TableNameDb:] WITH (nolock) WHERE [:FieldNameDbEscaped:]=[:ProviderSPParamPrefix:][:FieldName:]";
+        protected const string SqlGetBy[:FieldName:]Command = "SELECT * FROM [:TableOwnerNameAsPrefix:][:TableNameDb:] WITH (nolock) WHERE [:FieldNameDbEscaped:]=[:ProviderSPParamPrefix:][:FieldName:]";
 ]]>
                         </Condition>
                         <Condition Key="AutoIncrementPrimaryKey">
@@ -310,17 +310,17 @@ namespace [:Namespace:].Entities
         /// <summary>
         /// Auto Increment primary key pattern
         /// </summary>
-        public [:TableName:] GetByPrimaryKey([:FieldDotNetType:] id)
+        public async Task<[:TableName:]> GetByPrimaryKey([:FieldDotNetType:] id)
         {
-            return GetBy[:FieldName:](id);
+            return await GetBy[:FieldName:](id).ConfigureAwait(false);
         }
 
-        public [:TableName:] GetBy[:FieldName:]([:FieldDotNetType:] [:FieldName:])
+        public async Task<[:TableName:]> GetBy[:FieldName:]([:FieldDotNetType:] [:FieldName:])
         {
-            return Query<[:TableName:]>(SqlGetBy[:FieldName:]Command, new { [:FieldName:] = [:FieldName:] }).FirstOrDefault();
+            return await QueryAsync<[:TableName:]>(SqlGetBy[:FieldName:]Command, new { [:FieldName:] = [:FieldName:] }).ConfigureAwait(false).FirstOrDefault();
         }
         
-        public const string SqlGetBy[:FieldName:]Command = "SELECT * FROM [:TableOwnerNameAsPrefix:][:TableNameDb:] WITH (nolock) WHERE [:FieldNameDbEscaped:]=[:ProviderSPParamPrefix:][:FieldName:]";
+        protected const string SqlGetBy[:FieldName:]Command = "SELECT * FROM [:TableOwnerNameAsPrefix:][:TableNameDb:] WITH (nolock) WHERE [:FieldNameDbEscaped:]=[:ProviderSPParamPrefix:][:FieldName:]";
 ]]>
                         </Condition>
                         <Condition Key="AutoIncrement"></Condition>
@@ -331,17 +331,17 @@ namespace [:Namespace:].Entities
         /// <summary>
         /// Basic primary key pattern
         /// </summary>
-        public [:TableName:] GetByPrimaryKey([:FieldDotNetType:] id)
+        public async Task<[:TableName:]> GetByPrimaryKey([:FieldDotNetType:] id)
         {
-            return GetBy[:FieldName:](id);
+            return await GetBy[:FieldName:](id).ConfigureAwait(false);
         }
 
-        public [:TableName:] GetBy[:FieldName:]([:FieldDotNetType:] [:FieldName:])
+        public async Task<[:TableName:]> GetBy[:FieldName:]([:FieldDotNetType:] [:FieldName:])
         {
-            return Query<[:TableName:]>(SqlGetBy[:FieldName:]Command, new { [:FieldName:] = [:FieldName:] }).FirstOrDefault();
+            return await QueryAsync<[:TableName:]>(SqlGetBy[:FieldName:]Command, new { [:FieldName:] = [:FieldName:] }).ConfigureAwait(false).FirstOrDefault();
         }
         
-        public const string SqlGetBy[:FieldName:]Command = "SELECT * FROM [:TableOwnerNameAsPrefix:][:TableNameDb:] WITH (nolock) WHERE [:FieldNameDbEscaped:]=[:ProviderSPParamPrefix:][:FieldName:]";
+        protected const string SqlGetBy[:FieldName:]Command = "SELECT * FROM [:TableOwnerNameAsPrefix:][:TableNameDb:] WITH (nolock) WHERE [:FieldNameDbEscaped:]=[:ProviderSPParamPrefix:][:FieldName:]";
 ]]>
                         </Condition>
                         <Condition Key="NormalField"></Condition>
@@ -404,15 +404,15 @@ namespace [:Namespace:].Entities
                 </Condition>
                 <Condition Key="NoPrimaryKey">
                   <![CDATA[
-        public const string SqlInsertCommand = "INSERT INTO [:TableOwnerNameAsPrefix:][:TableNameDb:] ([#InsertParametersName#]) VALUES ([#InsertParametersValue#]) ";
+        protected const string SqlInsertCommand = "INSERT INTO [:TableOwnerNameAsPrefix:][:TableNameDb:] ([#InsertParametersName#]) VALUES ([#InsertParametersValue#]) ";
         ]]>
                 </Condition>
                 <Condition Key="WithPrimaryKey">
                     <![CDATA[
-        public const string SqlInsertCommand = "INSERT INTO [:TableOwnerNameAsPrefix:][:TableNameDb:] ([#InsertParametersName#]) VALUES ([#InsertParametersValue#]) ";
-        public const string SqlUpdateCommand = "UPDATE [:TableOwnerNameAsPrefix:][:TableNameDb:] SET [#UpdateParameters#] WHERE [#PrimaryKeyParameters#]; SELECT @@ROWCOUNT;";
-        public const string SqlDeleteCommand = "DELETE FROM [:TableOwnerNameAsPrefix:][:TableNameDb:] WHERE [#PrimaryKeyParameters#]; SELECT @@ROWCOUNT;";
-        public const string SqlInsertWithIdCommand = "INSERT INTO [:TableOwnerNameAsPrefix:][:TableNameDb:] ([#InsertParametersName#]) VALUES ([#InsertParametersValue#]) [:InsertWithIdSuffix:] SELECT scope_identity();";
+        protected const string SqlInsertCommand = "INSERT INTO [:TableOwnerNameAsPrefix:][:TableNameDb:] ([#InsertParametersName#]) VALUES ([#InsertParametersValue#]) ";
+        protected const string SqlUpdateCommand = "UPDATE [:TableOwnerNameAsPrefix:][:TableNameDb:] SET [#UpdateParameters#] WHERE [#PrimaryKeyParameters#]; SELECT @@ROWCOUNT;";
+        protected const string SqlDeleteCommand = "DELETE FROM [:TableOwnerNameAsPrefix:][:TableNameDb:] WHERE [#PrimaryKeyParameters#]; SELECT @@ROWCOUNT;";
+        protected const string SqlInsertWithIdCommand = "INSERT INTO [:TableOwnerNameAsPrefix:][:TableNameDb:] ([#InsertParametersName#]) VALUES ([#InsertParametersValue#]) [:InsertWithIdSuffix:] SELECT scope_identity();";
         ]]>
                 </Condition>
                 <ConditionContents>
