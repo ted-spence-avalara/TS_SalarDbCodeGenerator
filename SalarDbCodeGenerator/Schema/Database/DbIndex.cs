@@ -66,7 +66,7 @@ namespace SalarDbCodeGenerator.Schema.Database
 
                 // See if we need to uniqueify it
                 int id = 1;
-                if (_existingKeyNames.Contains(table.TableName + "|" + _indexKeyName)) {
+                while (_existingKeyNames.Contains(table.TableName + "|" + _indexKeyName)) {
                     id++;
                     _indexKeyName = sb.ToString() + id.ToString();
                 }
