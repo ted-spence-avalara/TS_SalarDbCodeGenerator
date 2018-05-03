@@ -267,9 +267,9 @@ namespace SalarDbCodeGenerator.Schema.Database
             var newIndexName = rawIndexName;
             int i = 1;
             while (existingIndexNames.Contains(newIndexName)) {
+                i++;
                 newIndexName = rawIndexName + i.ToString();
                 dbIndex.SetIndexKeyName(newIndexName);
-                i++;
             }
             Indexes.Add(dbIndex);
         }
