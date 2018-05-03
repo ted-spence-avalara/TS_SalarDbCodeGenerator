@@ -254,6 +254,25 @@ namespace SalarDbCodeGenerator.Schema.Database
         {
             return EscapedTableName ?? TableName;
         }
+
+        /// <summary>
+        /// Add an index; but if any other index on this table has the same name, add something to it
+        /// </summary>
+        /// <param name="dbIndex"></param>
+        public void AddIndex(DbIndex dbIndex)
+        {
+            // Here are all our existing names
+            var existingIndexNames = (from existing in Indexes select existing.GetIndexKeyName()).ToList();
+            var rawIndexName = dbIndex.GetIndexKeyName();
+            var newIndexName = rawIndexName;
+            int i = 1;
+            while (existingIndexNames.Contains(newIndexName)) {
+                newIndexName = rawIndexName + i.ToString();
+                dbIndex.SetIndexKeyName(newIndexName);
+                i++;
+            }
+            Indexes.Add(dbIndex);
+        }
         #endregion
 
         #region private methods

@@ -689,7 +689,7 @@ SELECT i.index_id
 
                 // Add either a simple or a complex key
                 if (columns.Any()) {
-                    table.Indexes.Add(new DbIndex()
+                    table.AddIndex(new DbIndex()
                     {
                         Keys = columns,
                         IsUnique = IsUnique,
