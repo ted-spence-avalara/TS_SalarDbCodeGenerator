@@ -208,15 +208,16 @@ namespace [:Namespace:].Entities
         
         public void Delete([#PrimaryKeyListAsArguments#])
         {
-            long rows_affected = Query<long>(SqlDeleteCommand, new { [#PrimaryKeyListAsCodeProps#] }).FirstOrDefault();
-            if (rows_affected != 1) throw new Exception("Delete [:TableName:]: Item not found");
+            var id_props = new { [#PrimaryKeyListAsCodeProps#] };
+            long rows_affected = Query<long>(SqlDeleteCommand, id_props).FirstOrDefault();
+            if (rows_affected != 1) throw new DbRecordNotFound("Delete", "[:TableName:]", id_props);
         }
 
         public void Update([:TableName:] model, int userid)
         {
             [#SetModifiedFields#]
             long rows_affected = Query<long>(SqlUpdateCommand, model).FirstOrDefault();
-            if (rows_affected != 1) throw new Exception("Update [:TableName:]: Item not found");
+            if (rows_affected != 1) throw new DbRecordNotFound("Update", "[:TableName:]", model);
         }
 
         public void Update(IEnumerable<[:TableName:]> models, int userid)
